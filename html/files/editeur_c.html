@@ -1,0 +1,1165 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>editeur_c.html</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="SynEdit HTML exporter" />
+<style type="text/css">
+<!--
+body { color: #000000; background-color: #FFFFFF; }
+.cpp1-assembler { color: #0000FF; }
+.cpp1-character { color: #000000; }
+.cpp1-comment { color: #316AC5; font-style: italic; }
+.cpp1-float { color: #800080; }
+.cpp1-hexadecimal { color: #800080; }
+.cpp1-identifier { color: #000000; }
+.cpp1-illegalchar { color: #000000; }
+.cpp1-number { color: #800080; }
+.cpp1-octal { color: #800080; }
+.cpp1-preprocessor { color: #008000; }
+.cpp1-reservedword { color: #000000; font-weight: bold; }
+.cpp1-space { background-color: #FFFFFF; color: #000000; }
+.cpp1-string { color: #FF0000; }
+.cpp1-symbol { color: #000000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<code><span style="font: 10pt Courier New;"><span class="cpp1-preprocessor">#include &quot;editeur.h&quot;
+
+</span><span class="cpp1-comment">//pour le calcul des cposBlocase en x et en y
+</span><span class="cpp1-reservedword">static</span><span class="cpp1-space">  SDL_Rect posBloc[</span><span class="cpp1-number">500</span><span class="cpp1-symbol">][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">]; 
+</span><span class="cpp1-comment">//premiere couche de surface
+</span><span class="cpp1-reservedword">static</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> posMatiere[</span><span class="cpp1-number">500</span><span class="cpp1-symbol">][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">]={VIDE};
+</span><span class="cpp1-comment">//deuxieme couche de surface
+</span><span class="cpp1-reservedword">static</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> posBatiment[</span><span class="cpp1-number">500</span><span class="cpp1-symbol">][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">]={VIDE};
+  
+
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> editeurNiv(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">)
+{ 
+FILE *fichier1;
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">((fichier1=fopen(</span><span class="cpp1-string">&quot;data/options.opt&quot;</span><span class="cpp1-symbol">,</span><span class="cpp1-string">&quot;rb&quot;</span><span class="cpp1-symbol">))==NULL)
+exit(</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+FILE *fichier2 = fopen(</span><span class="cpp1-string">&quot;data/option2.opt&quot;</span><span class="cpp1-symbol">,</span><span class="cpp1-string">&quot;wb&quot;</span><span class="cpp1-symbol">);
+xoring(fichier1,fichier2,</span><span class="cpp1-string">&quot;cle_Aukwar&quot;</span><span class="cpp1-symbol">);
+fclose(fichier1);
+fclose(fichier2);
+
+SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER);
+SDL_Surface *ecran;  
+SDL_WM_SetCaption(</span><span class="cpp1-string">&quot;Editeur De Niveau&quot;</span><span class="cpp1-symbol">,NULL);
+ecran=SDL_SetVideoMode(LARGEUR_FENETRE,HAUTEUR_FENETRE,</span><span class="cpp1-number">32</span><span class="cpp1-symbol">,SDL_HWSURFACE|SDL_DOUBLEBUF);
+SDL_Event event;
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> continuer=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,clicGaucheEnfonce=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,clicDroitEnfonce=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> surfaceActuelle=TERRE;
+</span><span class="cpp1-comment">//choix pour les batiments allies et enemis
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> choix=BATIMENTS_ALLIE; 
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nbCases=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> tempsPrecedent,tempsActuel;
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> priorite=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+</span><span class="cpp1-comment">//chargement des surfaces
+</span><span class="cpp1-identifier">SDL_Surface *blanc,*terre,*herbe,*eau,*ferme_allie,*ferme_opposant,*barriere,*choixSurface;
+SDL_Surface *choixSurfaceRectangle,*fondu_herbe_terre,*fondu_terre_herbe,*fondu_terre_herbe_haut,*fondu_herbe_terre_haut;
+SDL_Surface *fondu_eau_terre,*fondu_terre_eau,*fondu_terre_eau_haut,*fondu_eau_terre_haut;
+SDL_Surface *fondu_herbe_eau,*fondu_eau_herbe,*fondu_herbe_eau_haut,*fondu_eau_herbe_haut;
+SDL_Surface *large,*arbre,*soldat_allie,*soldat_ennemi;
+</span><span class="cpp1-comment">//SDL_Surface *img[20];
+//***********************
+</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> compt[</span><span class="cpp1-number">20</span><span class="cpp1-symbol">];
+
+</span><span class="cpp1-comment">/*
+for(i=0;i&lt;20;i++)
+{
+sprintf(compt,&quot;data/images/img_%ld.bmp&quot;,i);
+img[i]=SDL_LoadBMP(compt);
+SDL_SetColorKey(img[i], SDL_SRCCOLORKEY, SDL_MapRGB(img[i]-&gt;format,0,0,255));
+}
+*/
+
+//*************************
+</span><span class="cpp1-identifier">blanc=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/blanc.bmp&quot;</span><span class="cpp1-symbol">);
+terre=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/terre.bmp&quot;</span><span class="cpp1-symbol">);
+herbe=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/herbe.bmp&quot;</span><span class="cpp1-symbol">);
+eau=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/eau.bmp&quot;</span><span class="cpp1-symbol">);
+
+fondu_herbe_terre=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_herbe_terre.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_terre_herbe=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_terre_herbe.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_terre_herbe_haut=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_terre_herbe_haut.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_herbe_terre_haut=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_herbe_terre_haut.bmp&quot;</span><span class="cpp1-symbol">);
+
+fondu_eau_terre=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_eau_terre.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_terre_eau=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_terre_eau.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_terre_eau_haut=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_terre_eau_haut.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_eau_terre_haut=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_eau_terre_haut.bmp&quot;</span><span class="cpp1-symbol">);
+
+fondu_herbe_eau=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_herbe_eau.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_eau_herbe=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_eau_herbe.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_herbe_eau_haut=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_herbe_eau_haut.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_eau_herbe_haut=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_eau_herbe_haut.bmp&quot;</span><span class="cpp1-symbol">);
+
+barriere=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/barriere.bmp&quot;</span><span class="cpp1-symbol">);
+ferme_allie=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/ferme_allie.bmp&quot;</span><span class="cpp1-symbol">);
+ferme_opposant=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/ferme_opposants.bmp&quot;</span><span class="cpp1-symbol">);
+soldat_allie=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/soldat_allie.bmp&quot;</span><span class="cpp1-symbol">);
+soldat_ennemi=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/soldat_ennemi.bmp&quot;</span><span class="cpp1-symbol">);
+large=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/large.bmp&quot;</span><span class="cpp1-symbol">);
+choixSurfaceRectangle=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/choix.bmp&quot;</span><span class="cpp1-symbol">);
+arbre=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/arbre.bmp&quot;</span><span class="cpp1-symbol">);
+
+</span><span class="cpp1-comment">//transparence
+</span><span class="cpp1-identifier">SDL_SetColorKey(ferme_opposant, SDL_SRCCOLORKEY, SDL_MapRGB(ferme_opposant-&gt;format, </span><span class="cpp1-number">255</span><span class="cpp1-symbol">, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">));
+SDL_SetColorKey(ferme_allie, SDL_SRCCOLORKEY, SDL_MapRGB(ferme_allie-&gt;format,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">255</span><span class="cpp1-symbol">));
+SDL_SetColorKey(barriere, SDL_SRCCOLORKEY, SDL_MapRGB(barriere-&gt;format,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">255</span><span class="cpp1-symbol">));
+SDL_SetColorKey(arbre, SDL_SRCCOLORKEY, SDL_MapRGB(arbre-&gt;format,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">255</span><span class="cpp1-symbol">));
+SDL_SetColorKey(soldat_allie, SDL_SRCCOLORKEY, SDL_MapRGB(soldat_allie-&gt;format,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">255</span><span class="cpp1-symbol">));
+SDL_SetColorKey(soldat_ennemi, SDL_SRCCOLORKEY, SDL_MapRGB(soldat_ennemi-&gt;format,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">255</span><span class="cpp1-symbol">));
+
+
+SDL_Rect posSouris,posTemp,posSelect,posLarge,posChoix;
+posLarge.x=</span><span class="cpp1-number">900</span><span class="cpp1-symbol">;
+posLarge.y=</span><span class="cpp1-number">900</span><span class="cpp1-symbol">;
+
+posChoix.x=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+posChoix.y=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+SDL_TimerID timer;
+
+</span><span class="cpp1-comment">//appel de afficherCarte toutes les 150ms
+</span><span class="cpp1-identifier">timer = SDL_AddTimer(</span><span class="cpp1-number">150</span><span class="cpp1-symbol">,afficherCarte,&amp;posSouris);
+
+
+</span><span class="cpp1-reservedword">while</span><span class="cpp1-symbol">(continuer) 
+{
+SDL_PollEvent(&amp;event);
+priorite=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">; 
+</span><span class="cpp1-reservedword">switch</span><span class="cpp1-symbol">(event.type)
+ {
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDL_QUIT:
+ continuer=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-comment">//on quite donc on met tout a vide
+</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;</span><span class="cpp1-number">101</span><span class="cpp1-symbol">;i++)
+ {
+ </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;j&lt;</span><span class="cpp1-number">101</span><span class="cpp1-symbol">;j++)
+  {
+  posMatiere[i][j]=VIDE;
+  posBatiment[i][j]=VIDE;
+  posBloc[i][j].x=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  posBloc[i][j].y=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  }
+ }
+ 
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDL_ACTIVEEVENT:
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(event.active.gain ==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)
+ {
+ posSouris.x=</span><span class="cpp1-number">200</span><span class="cpp1-symbol">;</span><span class="cpp1-comment">//si la souris est sortie de la fenetre 
+</span><span class="cpp1-space"> posSouris.y=</span><span class="cpp1-number">200</span><span class="cpp1-symbol">;</span><span class="cpp1-comment">//on la met en(200,200) pour que la carte ne bouge plus
+</span><span class="cpp1-space"> }
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">; 
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDL_MOUSEMOTION:
+ posSouris.x=event.motion.x;</span><span class="cpp1-comment">//on met les position de la souris
+</span><span class="cpp1-space"> posSouris.y=event.motion.y;</span><span class="cpp1-comment">//dans posSouris
+</span><span class="cpp1-space"> </span><span class="cpp1-comment">//si on bouge avec le clic gauche enfonc&eacute;
+</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(clicGaucheEnfonce)
+ {
+ </span><span class="cpp1-comment">//si on a selectionn&eacute; un batiment
+</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">((surfaceActuelle==FERME_ALLIE || surfaceActuelle==FERME_OPPOSANT || surfaceActuelle==BARRIERE || surfaceActuelle==ARBRE || surfaceActuelle==SOLDAT_ALLIE || surfaceActuelle==SOLDAT_ENNEMI </span><span class="cpp1-comment">/*****|| surfaceActuelle==IMG0 ||surfaceActuelle==IMG1||surfaceActuelle==IMG2||surfaceActuelle==IMG3||surfaceActuelle==IMG4||surfaceActuelle==IMG5||surfaceActuelle==IMG6||surfaceActuelle==IMG7||surfaceActuelle==IMG8||surfaceActuelle==IMG9||surfaceActuelle==IMG10||surfaceActuelle==IMG11||surfaceActuelle==IMG12||surfaceActuelle==IMG13||surfaceActuelle==IMG14||surfaceActuelle==IMG15||surfaceActuelle==IMG16||surfaceActuelle==IMG17||surfaceActuelle==IMG18||surfaceActuelle==IMG19*/</span><span class="cpp1-symbol">))
+  {
+  </span><span class="cpp1-comment">// posBatiment[calcul de l endroit.x][calcul de l endroit.y]=surfaceActuelle
+</span><span class="cpp1-space">   posBatiment[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=surfaceActuelle; 
+   
+  }
+  
+  </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+  {
+</span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;=nbCases;i++)
+   {
+  posMatiere[(event.button.x/TAILLE_BLOC+i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC+i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=surfaceActuelle; 
+  posMatiere[(event.button.x/TAILLE_BLOC-i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC-i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=surfaceActuelle;
+  posMatiere[(event.button.x/TAILLE_BLOC-i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC+i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=surfaceActuelle;      
+  posMatiere[(event.button.x/TAILLE_BLOC+i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC-i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=surfaceActuelle;    
+  posMatiere[(event.button.x/TAILLE_BLOC-i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=surfaceActuelle;
+  posMatiere[(event.button.x/TAILLE_BLOC+i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=surfaceActuelle;        
+  posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC-i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=surfaceActuelle;
+  posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC+i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=surfaceActuelle;        
+   } 
+   </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(surfaceActuelle==EAU &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==HERBE || surfaceActuelle==HERBE &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==EAU)
+   {
+   posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=FONDU_EAU_HERBE_HAUT;
+   }
+   
+   </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(surfaceActuelle==HERBE &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==EAU || surfaceActuelle==EAU &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==HERBE)
+   {
+   posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=FONDU_HERBE_EAU_HAUT;
+   } 
+   
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(surfaceActuelle==EAU &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==HERBE|| surfaceActuelle==HERBE &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==EAU)
+   {
+   posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=FONDU_EAU_HERBE;
+   }  
+    
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(surfaceActuelle==HERBE &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==EAU || surfaceActuelle==EAU &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==HERBE)
+   {
+   posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=FONDU_HERBE_EAU;
+   }  
+   
+   </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(surfaceActuelle==EAU &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==TERRE || surfaceActuelle==TERRE &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==EAU)
+   {
+   posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=FONDU_EAU_TERRE_HAUT;
+   }  
+   
+   </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(surfaceActuelle==TERRE &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==EAU || surfaceActuelle==EAU &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==TERRE)
+   {
+   posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=FONDU_TERRE_EAU_HAUT;
+   }  
+   
+   </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(surfaceActuelle==TERRE &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==EAU || surfaceActuelle==EAU &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==TERRE)
+   {
+   posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=FONDU_TERRE_EAU;
+   }  
+  
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(surfaceActuelle==EAU &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==TERRE || surfaceActuelle==TERRE &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==EAU)
+   {
+    posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=FONDU_EAU_TERRE;
+   }  
+  
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(surfaceActuelle==TERRE &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==HERBE || surfaceActuelle==HERBE &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==TERRE)
+   {
+   posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=FONDU_TERRE_HERBE_HAUT;
+   }  
+  
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(surfaceActuelle==HERBE &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==TERRE || surfaceActuelle==TERRE &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==HERBE)
+   {
+   posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=FONDU_HERBE_TERRE;
+   priorite=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+   }         
+  
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(surfaceActuelle==TERRE &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==HERBE || surfaceActuelle==HERBE &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==TERRE)
+   {
+   </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(priorite==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)
+     {
+   posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=FONDU_TERRE_HERBE;
+     priorite=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+     }
+   }  
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(surfaceActuelle==HERBE &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==TERRE || surfaceActuelle==TERRE &amp;&amp; posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]==HERBE)
+   {
+   </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(priorite==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)
+     {
+   posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=FONDU_HERBE_TERRE_HAUT;
+    priorite=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;  
+     }
+   }  
+  }
+ }
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(clicDroitEnfonce)
+ {
+ posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=VIDE;
+
+ }
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDL_MOUSEBUTTONDOWN:
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(event.button.button==SDL_BUTTON_LEFT)
+ {
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">((surfaceActuelle==FERME_ALLIE || surfaceActuelle==FERME_OPPOSANT || surfaceActuelle==BARRIERE || surfaceActuelle==ARBRE || surfaceActuelle==SOLDAT_ALLIE || surfaceActuelle==SOLDAT_ENNEMI </span><span class="cpp1-comment">/*****|| surfaceActuelle==IMG0 ||surfaceActuelle==IMG1||surfaceActuelle==IMG2||surfaceActuelle==IMG3||surfaceActuelle==IMG4||surfaceActuelle==IMG5||surfaceActuelle==IMG6||surfaceActuelle==IMG7||surfaceActuelle==IMG8||surfaceActuelle==IMG9||surfaceActuelle==IMG10||surfaceActuelle==IMG11||surfaceActuelle==IMG12||surfaceActuelle==IMG13||surfaceActuelle==IMG14||surfaceActuelle==IMG15||surfaceActuelle==IMG16||surfaceActuelle==IMG17||surfaceActuelle==IMG18||surfaceActuelle==IMG19*/</span><span class="cpp1-symbol">))
+  {
+  posBatiment[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=surfaceActuelle;  
+ }
+ </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space"> {
+  
+  
+ </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;=nbCases;i++)
+   {
+  posMatiere[(event.button.x/TAILLE_BLOC+i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC+i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=surfaceActuelle; 
+  posMatiere[(event.button.x/TAILLE_BLOC-i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC-i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=surfaceActuelle;
+  posMatiere[(event.button.x/TAILLE_BLOC-i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC+i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=surfaceActuelle;      
+  posMatiere[(event.button.x/TAILLE_BLOC+i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC-i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=surfaceActuelle;    
+  posMatiere[(event.button.x/TAILLE_BLOC-i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=surfaceActuelle;
+  posMatiere[(event.button.x/TAILLE_BLOC+i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=surfaceActuelle;        
+  posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC-i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=surfaceActuelle;
+  posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC+i)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=surfaceActuelle;        
+   }
+ }
+ clicGaucheEnfonce=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+ }
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(event.button.button==SDL_BUTTON_RIGHT)
+ {
+ 
+ posBatiment[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=VIDE;
+ 
+
+ posBatiment[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=VIDE;
+ posMatiere[(event.button.x/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x/TAILLE_BLOC)][(event.button.y/TAILLE_BLOC)-(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y/TAILLE_BLOC)]=VIDE;
+ 
+ clicDroitEnfonce=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+ }
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDL_MOUSEBUTTONUP:
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(event.button.button==SDL_BUTTON_LEFT)
+ {
+ clicGaucheEnfonce=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+ }
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(event.button.button==SDL_BUTTON_RIGHT)
+ {
+ clicDroitEnfonce=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+ }
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDL_KEYDOWN:
+ </span><span class="cpp1-reservedword">switch</span><span class="cpp1-symbol">(event.key.keysym.sym)
+ {
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDLK_ESCAPE:
+ continuer=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;</span><span class="cpp1-number">101</span><span class="cpp1-symbol">;i++)
+ {
+ </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;j&lt;</span><span class="cpp1-number">101</span><span class="cpp1-symbol">;j++)
+  {
+  posMatiere[i][j]=VIDE;
+  posBatiment[i][j]=VIDE;
+  posBloc[i][j].x=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  posBloc[i][j].y=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  }
+ }
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDLK_KP1:
+ surfaceActuelle=TERRE;
+ choixSurface=terre;
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDLK_KP2:
+ surfaceActuelle=HERBE;
+ choixSurface=herbe;
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDLK_KP_PLUS:
+ choix=BATIMENTS_ALLIE;
+ </span><span class="cpp1-reservedword">switch</span><span class="cpp1-symbol">(surfaceActuelle)
+ {
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FERME_OPPOSANT:
+ surfaceActuelle=FERME_ALLIE;
+ choixSurface=ferme_allie;
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SOLDAT_ENNEMI:
+ surfaceActuelle=SOLDAT_ALLIE;
+ choixSurface=soldat_allie;
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ }
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDLK_KP_MINUS:
+ choix=BATIMENTS_OPPOSANT;
+ </span><span class="cpp1-reservedword">switch</span><span class="cpp1-symbol">(surfaceActuelle)
+ {
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FERME_ALLIE:
+ surfaceActuelle=FERME_OPPOSANT;
+ choixSurface=ferme_opposant;
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SOLDAT_ALLIE:
+ surfaceActuelle=SOLDAT_ENNEMI;
+ choixSurface=soldat_ennemi;
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ }
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDLK_KP3:
+ surfaceActuelle=EAU;
+ choixSurface=eau;
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDLK_KP4:
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(choix==BATIMENTS_ALLIE)
+ {
+ surfaceActuelle=FERME_ALLIE; 
+ choixSurface=ferme_allie;
+ }
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(choix==BATIMENTS_OPPOSANT)
+ {
+ surfaceActuelle=FERME_OPPOSANT;
+ choixSurface=ferme_opposant;
+ }
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDLK_KP5:
+ surfaceActuelle=ARBRE;
+ choixSurface=arbre;
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDLK_KP6:
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(choix==BATIMENTS_ALLIE)
+ {
+ surfaceActuelle=SOLDAT_ALLIE; 
+ choixSurface=soldat_allie;
+ }
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(choix==BATIMENTS_OPPOSANT)
+ {
+ surfaceActuelle=SOLDAT_ENNEMI;
+ choixSurface=soldat_ennemi;
+ }
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDLK_KP9:
+ surfaceActuelle=BARRIERE;
+ choixSurface=barriere;
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDLK_l:
+ nbCases+=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+ posLarge.x=</span><span class="cpp1-number">100</span><span class="cpp1-symbol">;
+ posLarge.y=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(nbCases==</span><span class="cpp1-number">2</span><span class="cpp1-symbol">)
+ {
+ posLarge.x=</span><span class="cpp1-number">900</span><span class="cpp1-symbol">;
+ posLarge.y=</span><span class="cpp1-number">900</span><span class="cpp1-symbol">;
+ nbCases=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+ }
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDLK_s:
+ sauvegarderNiv();
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">; 
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDLK_c:
+ chargerNiv();
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">; 
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDLK_TAB:
+ </span><span class="cpp1-comment">//si apui sur tab on met tout a vide
+</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;</span><span class="cpp1-number">101</span><span class="cpp1-symbol">;i++)
+ {
+ </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;j&lt;</span><span class="cpp1-number">101</span><span class="cpp1-symbol">;j++)
+  {
+  posMatiere[i][j]=VIDE;
+  posBatiment[i][j]=VIDE;
+  }
+ }
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">; 
+ 
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDLK_e:
+ posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;</span><span class="cpp1-comment">//si appuie sur e:
+</span><span class="cpp1-space"> posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;</span><span class="cpp1-comment">//on remet la carte a (0,0)
+</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+</span><span class="cpp1-comment">//**************************
+/*
+case SDLK_q:
+surfaceActuelle=IMG0;
+choixSurface=img[0];
+break;
+case SDLK_z:
+surfaceActuelle=IMG1;
+choixSurface=img[1];
+break;
+case SDLK_b:
+surfaceActuelle=IMG2;
+choixSurface=img[2];
+break;
+case SDLK_r:
+surfaceActuelle=IMG3;
+choixSurface=img[3];
+break;
+case SDLK_t:
+surfaceActuelle=IMG4;
+choixSurface=img[4];
+break;
+case SDLK_y:
+surfaceActuelle=IMG5;
+choixSurface=img[5];
+break;
+case SDLK_u:
+surfaceActuelle=IMG6;
+choixSurface=img[6];
+break;
+case SDLK_i:
+surfaceActuelle=IMG7;
+choixSurface=img[7];
+break;
+case SDLK_o:
+surfaceActuelle=IMG8;
+choixSurface=img[8];
+break;
+case SDLK_p:
+surfaceActuelle=IMG9;
+choixSurface=img[9];
+break;
+case SDLK_a:
+surfaceActuelle=IMG10;
+choixSurface=img[10];
+break;
+case SDLK_n:
+surfaceActuelle=IMG11;
+choixSurface=img[11];
+break;
+case SDLK_d:
+surfaceActuelle=IMG12;
+choixSurface=img[12];
+break;
+case SDLK_f:
+surfaceActuelle=IMG13;
+choixSurface=img[13];
+break;
+case SDLK_g:
+surfaceActuelle=IMG14;
+choixSurface=img[14];
+break;
+case SDLK_h:
+surfaceActuelle=IMG15;
+choixSurface=img[15];
+break;
+case SDLK_j:
+surfaceActuelle=IMG16;
+choixSurface=img[16];
+break;
+case SDLK_k:
+surfaceActuelle=IMG17;
+choixSurface=img[17];
+break;
+case SDLK_DOLLAR:
+surfaceActuelle=IMG18;
+choixSurface=img[18];    
+break;
+case SDLK_v:
+surfaceActuelle=IMG19;
+choixSurface=img[19];
+break;
+*/
+//**************************
+</span><span class="cpp1-symbol">}
+ }
+SDL_FillRect(ecran, NULL, SDL_MapRGB(ecran-&gt;format,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">));
+</span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;=NB_BLOCS_X;i++)
+ {
+  </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;j&lt;=NB_BLOCS_Y;j++)
+  {
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">((posBloc[i][j].x&gt;-TAILLE_BLOC/</span><span class="cpp1-number">4</span><span class="cpp1-space"> &amp;&amp; posBloc[i][j].x&lt;LARGEUR_FENETRE)&amp;&amp;(posBloc[i][j].y&gt;-TAILLE_BLOC/</span><span class="cpp1-number">4</span><span class="cpp1-space"> &amp;&amp; posBloc[i][j].y&lt;HAUTEUR_FENETRE))
+   {
+   </span><span class="cpp1-reservedword">switch</span><span class="cpp1-symbol">(posMatiere[i][j])
+   {
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_HERBE_EAU_HAUT:
+   SDL_BlitSurface(fondu_herbe_eau_haut,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_EAU_HERBE_HAUT:
+   SDL_BlitSurface(fondu_eau_herbe_haut,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_EAU_HERBE:
+   SDL_BlitSurface(fondu_eau_herbe,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_HERBE_EAU:
+   SDL_BlitSurface(fondu_herbe_eau,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_EAU_TERRE_HAUT:
+   SDL_BlitSurface(fondu_eau_terre_haut,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_TERRE_EAU_HAUT:
+   SDL_BlitSurface(fondu_terre_eau_haut,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_TERRE_EAU:
+   SDL_BlitSurface(fondu_terre_eau,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_EAU_TERRE: 
+   SDL_BlitSurface(fondu_eau_terre,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_TERRE_HERBE_HAUT:
+   SDL_BlitSurface(fondu_terre_herbe_haut,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_HERBE_TERRE_HAUT: 
+   SDL_BlitSurface(fondu_herbe_terre_haut,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_HERBE_TERRE:
+   SDL_BlitSurface(fondu_herbe_terre,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_TERRE_HERBE:
+   SDL_BlitSurface(fondu_terre_herbe,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">; 
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> TERRE:
+   SDL_BlitSurface(terre,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> HERBE:
+   SDL_BlitSurface(herbe,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> EAU:
+   SDL_BlitSurface(eau,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> VIDE:
+   SDL_BlitSurface(blanc,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    }
+   }
+  }
+ }
+  </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;=NB_BLOCS_X;i++)
+ {
+  </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;j&lt;=NB_BLOCS_Y;j++)
+  {
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">((posBloc[i][j].x&gt;-TAILLE_BLOC/</span><span class="cpp1-number">4</span><span class="cpp1-space"> &amp;&amp; posBloc[i][j].x&lt;LARGEUR_FENETRE)&amp;&amp;(posBloc[i][j].y&gt;-TAILLE_BLOC/</span><span class="cpp1-number">4</span><span class="cpp1-space"> &amp;&amp; posBloc[i][j].y&lt;HAUTEUR_FENETRE))
+   {
+  </span><span class="cpp1-reservedword">switch</span><span class="cpp1-symbol">(posBatiment[i][j])
+    {
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FERME_ALLIE:
+    SDL_BlitSurface(ferme_allie,NULL,ecran,&amp;posBloc[i][j]);
+    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FERME_OPPOSANT:
+    SDL_BlitSurface(ferme_opposant,NULL,ecran,&amp;posBloc[i][j]);
+    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> BARRIERE:
+    posTemp.x=posBloc[i][j].x-barriere-&gt;w+TAILLE_BLOC;
+    posTemp.y=posBloc[i][j].y-barriere-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(barriere,NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> ARBRE:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-arbre-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(arbre,NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SOLDAT_ENNEMI:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-soldat_ennemi-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(soldat_ennemi,NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SOLDAT_ALLIE:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-soldat_allie-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(soldat_allie,NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-comment">//*********************************
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">/*
+    case IMG0:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[0]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[0],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    break;
+    case IMG1:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[1]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[1],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    break;
+    case IMG2:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[2]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[2],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    break;
+    case IMG3:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[3]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[3],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    break;
+    case IMG4:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[4]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[4],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    break;
+    case IMG5:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[5]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[5],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    break;
+    case IMG6:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[6]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[6],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    break;
+    case IMG7:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[7]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[7],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    break;
+    case IMG8:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[8]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[8],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    break;
+    case IMG9:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[9]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[9],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    break;
+    case IMG10:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[10]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[10],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    case IMG11:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[11]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[11],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    break;
+    case IMG12:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[12]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[12],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    break;
+    case IMG13:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[13]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[13],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    break;
+    case IMG14:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[14]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[14],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    break;
+    case IMG15:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[15]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[0],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    break;
+    case IMG16:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[16]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[16],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    case IMG17:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[17]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[17],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    break;
+    case IMG18:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[18]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[18],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    case IMG19:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-img[19]-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(img[19],NULL,ecran,&amp;posTemp);
+    initPos(&amp;posTemp);
+    break;
+    */
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">//**********************************
+</span><span class="cpp1-space">    
+    }
+   }
+  }
+ }
+
+SDL_BlitSurface(choixSurfaceRectangle,NULL,ecran,&amp;posChoix);
+SDL_BlitSurface(choixSurface,NULL,ecran,&amp;posChoix);
+SDL_BlitSurface(large,NULL,ecran,&amp;posLarge);
+initPos(&amp;posSelect);
+SDL_Flip(ecran);
+tempsActuel = SDL_GetTicks();
+
+
+SDL_Delay(</span><span class="cpp1-number">10</span><span class="cpp1-symbol">);
+
+}
+SDL_RemoveTimer(timer);
+
+</span><span class="cpp1-comment">//un paquet de SDL_FreeSurface ......
+</span><span class="cpp1-identifier">SDL_FreeSurface(blanc);
+SDL_FreeSurface(terre);
+SDL_FreeSurface(eau);
+SDL_FreeSurface(herbe);
+SDL_FreeSurface(ferme_allie);
+SDL_FreeSurface(ferme_opposant);
+SDL_FreeSurface(barriere);
+SDL_FreeSurface(choixSurface);
+SDL_FreeSurface(choixSurfaceRectangle);
+SDL_FreeSurface(fondu_herbe_terre);
+SDL_FreeSurface(fondu_terre_herbe);
+SDL_FreeSurface(fondu_terre_herbe_haut);
+SDL_FreeSurface(fondu_herbe_terre_haut);
+SDL_FreeSurface(fondu_eau_terre);
+SDL_FreeSurface(fondu_terre_eau);
+SDL_FreeSurface(fondu_terre_eau_haut);
+SDL_FreeSurface(fondu_eau_terre_haut);
+SDL_FreeSurface(fondu_herbe_eau);
+SDL_FreeSurface(fondu_eau_herbe);
+SDL_FreeSurface(fondu_herbe_eau_haut);
+SDL_FreeSurface(fondu_eau_herbe_haut);
+SDL_FreeSurface(large);
+SDL_FreeSurface(arbre);
+
+SDL_Quit();
+}
+
+Uint32 afficherCarte(Uint32 intervalle, </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *parametre)
+{
+SDL_Rect *posSouris=(SDL_Rect*)parametre;
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posSouris-&gt;x&lt;TAILLE_BLOC/</span><span class="cpp1-number">4</span><span class="cpp1-symbol">)
+ {
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x &lt;TAILLE_BLOC*</span><span class="cpp1-number">2</span><span class="cpp1-symbol">)
+  {
+ posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x+=TAILLE_BLOC;
+  }
+ }
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posSouris-&gt;x&gt;LARGEUR_FENETRE-(TAILLE_BLOC/</span><span class="cpp1-number">2</span><span class="cpp1-symbol">)&amp;&amp; (posBloc[NB_BLOCS_X][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x&gt;LARGEUR_FENETRE-(</span><span class="cpp1-number">3</span><span class="cpp1-symbol">*TAILLE_BLOC)))
+ {
+ posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x-=TAILLE_BLOC;
+ }
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posSouris-&gt;y&lt;TAILLE_BLOC &amp;&amp; (posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y &lt;TAILLE_BLOC*</span><span class="cpp1-number">2</span><span class="cpp1-symbol">))
+ {
+ posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y+=TAILLE_BLOC;
+ }
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posSouris-&gt;y&gt;HAUTEUR_FENETRE-(TAILLE_BLOC/</span><span class="cpp1-number">2</span><span class="cpp1-symbol">) &amp;&amp; (posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][NB_BLOCS_Y].y&gt;HAUTEUR_FENETRE-(</span><span class="cpp1-number">3</span><span class="cpp1-symbol">*TAILLE_BLOC)))
+ {
+ posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y-=TAILLE_BLOC;
+ }
+</span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;=NB_BLOCS_X+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;i++)
+ {
+ </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;j&lt;=NB_BLOCS_Y;j++)
+  {
+  posBloc[i+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][j].x= posBloc[i][j].x+TAILLE_BLOC;
+  posBloc[i][j+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">].x= posBloc[i][j].x;
+  posBloc[i+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][j].y= posBloc[i][j].y;
+  posBloc[i][j+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">].y= posBloc[i][j].y+TAILLE_BLOC;   
+  }   
+ }
+</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> intervalle;
+ 
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> sauvegarderNiv(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">)
+{
+GtkWidget *fenetre;
+GtkWidget *valider;
+GtkWidget *vBox;
+GtkWidget *texte;
+
+fenetre = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+gtk_window_set_position(GTK_WINDOW(fenetre), GTK_WIN_POS_CENTER);
+gtk_window_set_default_size(GTK_WINDOW(fenetre), </span><span class="cpp1-number">320</span><span class="cpp1-symbol">, </span><span class="cpp1-number">200</span><span class="cpp1-symbol">);
+gtk_window_set_title(GTK_WINDOW(fenetre), </span><span class="cpp1-string">&quot;Sauvegarder le niveau&quot;</span><span class="cpp1-symbol">);
+
+
+vBox=gtk_vbox_new(TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+gtk_container_add(GTK_CONTAINER(fenetre),vBox);
+
+texte=gtk_entry_new();
+gtk_entry_set_text(GTK_ENTRY(texte),</span><span class="cpp1-string">&quot;nom de votre niveau&quot;</span><span class="cpp1-symbol">);
+gtk_box_pack_start(GTK_BOX(vBox),texte,TRUE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+valider=gtk_button_new_from_stock(</span><span class="cpp1-string">&quot;valider&quot;</span><span class="cpp1-symbol">);
+gtk_box_pack_start(GTK_BOX(vBox),valider,TRUE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+g_signal_connect(G_OBJECT(fenetre), </span><span class="cpp1-string">&quot;destroy&quot;</span><span class="cpp1-symbol">, G_CALLBACK(quitter_editeur),fenetre);
+g_signal_connect(G_OBJECT(texte), </span><span class="cpp1-string">&quot;activate&quot;</span><span class="cpp1-symbol">,G_CALLBACK(sauver_texte),texte);
+g_signal_connect(G_OBJECT(valider),</span><span class="cpp1-string">&quot;clicked&quot;</span><span class="cpp1-symbol">, G_CALLBACK(sauver_texte),texte);
+
+gtk_widget_show_all(fenetre);
+gtk_main(); 
+}  
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> quitter_editeur(gpointer data)
+{
+GtkWidget *fenetre;
+fenetre=gtk_widget_get_toplevel(GTK_WIDGET(data));
+gtk_widget_destroy(fenetre); 
+editeurNiv();</span><span class="cpp1-comment">//si la fenetre est detruite on retourne a l editeur
+</span><span class="cpp1-symbol">}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> sauver_texte(GtkWidget *widget,gpointer data)
+{
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+GtkWidget *fenetre,*info,*label,*vBox,*valider,*annuler;
+FILE *fichier=NULL,*test=NULL;
+</span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> gchar *recupTxt,*utf8;
+</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> extension[</span><span class="cpp1-number">2000</span><span class="cpp1-symbol">];
+recupTxt=gtk_entry_get_text(GTK_ENTRY(data));
+sprintf(extension,</span><span class="cpp1-string">&quot;data/niveaux/%s.niv&quot;</span><span class="cpp1-symbol">,recupTxt);
+test=fopen(extension,</span><span class="cpp1-string">&quot;r&quot;</span><span class="cpp1-symbol">);
+
+fenetre=gtk_widget_get_toplevel(GTK_WIDGET(data));
+
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(test!=NULL)
+{
+GtkWidget *texte;
+label=gtk_label_new(g_locale_to_utf8(</span><span class="cpp1-string">&quot;le niveau existe d&eacute;j&agrave;,&eacute;craser ?.&quot;</span><span class="cpp1-symbol">,-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,NULL,NULL,NULL));
+info = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+gtk_window_set_position(GTK_WINDOW(info), GTK_WIN_POS_CENTER);
+gtk_window_set_default_size(GTK_WINDOW(info), </span><span class="cpp1-number">320</span><span class="cpp1-symbol">, </span><span class="cpp1-number">200</span><span class="cpp1-symbol">);
+gtk_window_set_title(GTK_WINDOW(info), </span><span class="cpp1-string">&quot;Confirmation&quot;</span><span class="cpp1-symbol">);
+ 
+vBox=gtk_vbox_new(TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+gtk_container_add(GTK_CONTAINER(info),vBox);    
+
+texte=gtk_entry_new();
+gtk_box_pack_start(GTK_BOX(vBox),texte,FALSE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);  
+gtk_entry_set_text(GTK_ENTRY(texte),extension);
+
+gtk_box_pack_start(GTK_BOX(vBox),label,TRUE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);  
+  
+valider=gtk_button_new_from_stock(</span><span class="cpp1-string">&quot;valider&quot;</span><span class="cpp1-symbol">);
+gtk_box_pack_start(GTK_BOX(vBox),valider,TRUE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);  
+  
+annuler=gtk_button_new_from_stock(</span><span class="cpp1-string">&quot;annuler&quot;</span><span class="cpp1-symbol">);
+gtk_box_pack_start(GTK_BOX(vBox),annuler,TRUE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);    
+
+g_signal_connect(G_OBJECT(fenetre), </span><span class="cpp1-string">&quot;destroy&quot;</span><span class="cpp1-symbol">, G_CALLBACK(Quitter),info);
+g_signal_connect(G_OBJECT(valider), </span><span class="cpp1-string">&quot;clicked&quot;</span><span class="cpp1-symbol">, G_CALLBACK(sauver_direct),texte);
+g_signal_connect(G_OBJECT(annuler), </span><span class="cpp1-string">&quot;clicked&quot;</span><span class="cpp1-symbol">, G_CALLBACK(Quitter),info);                                
+
+
+gtk_widget_show_all(info);
+gtk_main();
+fclose(test);
+}
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(test==NULL)
+{
+GtkWidget *entry;
+entry=gtk_entry_new();
+gtk_entry_set_text(GTK_ENTRY(entry),extension);
+sauver_direct(fenetre,(gpointer*)entry);
+}
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> chargerNiv(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">)
+{
+GtkWidget *fenetre;
+GtkWidget *valider;
+GtkWidget *vBox;
+GtkWidget *texte;
+
+fenetre = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+gtk_window_set_position(GTK_WINDOW(fenetre), GTK_WIN_POS_CENTER);
+gtk_window_set_default_size(GTK_WINDOW(fenetre), </span><span class="cpp1-number">320</span><span class="cpp1-symbol">, </span><span class="cpp1-number">200</span><span class="cpp1-symbol">);
+gtk_window_set_title(GTK_WINDOW(fenetre), </span><span class="cpp1-string">&quot;Charger un niveau&quot;</span><span class="cpp1-symbol">);
+
+
+vBox=gtk_vbox_new(TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+gtk_container_add(GTK_CONTAINER(fenetre),vBox);
+
+texte=gtk_entry_new();
+gtk_entry_set_text(GTK_ENTRY(texte),</span><span class="cpp1-string">&quot;nom de votre niveau&quot;</span><span class="cpp1-symbol">);
+gtk_box_pack_start(GTK_BOX(vBox),texte,TRUE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+valider=gtk_button_new_from_stock(</span><span class="cpp1-string">&quot;valider&quot;</span><span class="cpp1-symbol">);
+gtk_box_pack_start(GTK_BOX(vBox),valider,TRUE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+g_signal_connect(G_OBJECT(fenetre), </span><span class="cpp1-string">&quot;destroy&quot;</span><span class="cpp1-symbol">, G_CALLBACK(quitter_editeur),fenetre);
+g_signal_connect(G_OBJECT(texte), </span><span class="cpp1-string">&quot;activate&quot;</span><span class="cpp1-symbol">,G_CALLBACK(charger_texte),(gpointer*)texte);
+g_signal_connect(G_OBJECT(valider),</span><span class="cpp1-string">&quot;clicked&quot;</span><span class="cpp1-symbol">, G_CALLBACK(charger_texte),texte);
+
+gtk_widget_show_all(fenetre);
+gtk_main(); 
+}  
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> charger_texte(GtkWidget *widget,gpointer data)
+{
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,continuer=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+GtkWidget *fenetre;
+GtkWidget *info;
+FILE *fichier=NULL,*fichier1=NULL,*fichier2=NULL;
+</span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> gchar *recupTxt;
+</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> extension[</span><span class="cpp1-number">2000</span><span class="cpp1-symbol">],texteDialogue[</span><span class="cpp1-number">2000</span><span class="cpp1-symbol">],extension2[</span><span class="cpp1-number">200</span><span class="cpp1-symbol">];
+recupTxt=gtk_entry_get_text(GTK_ENTRY(data));
+sprintf(extension,</span><span class="cpp1-string">&quot;data/niveaux/%s.niv&quot;</span><span class="cpp1-symbol">,recupTxt);
+sprintf(texteDialogue,</span><span class="cpp1-string">&quot;le niveau %s n'existe pas.&quot;</span><span class="cpp1-symbol">,recupTxt);
+fichier=fopen(extension,</span><span class="cpp1-string">&quot;r&quot;</span><span class="cpp1-symbol">);
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(fichier!=NULL)
+{
+
+fclose(fichier);
+chargerNiveau(extension,posMatiere,posBatiment);
+
+}
+fenetre=gtk_widget_get_toplevel(GTK_WIDGET(data));
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(fichier==NULL)
+{
+info = gtk_message_dialog_new (GTK_WINDOW(fenetre),
+        GTK_DIALOG_MODAL,
+        GTK_MESSAGE_INFO,
+        GTK_BUTTONS_OK,
+        texteDialogue);
+
+</span><span class="cpp1-reservedword">switch</span><span class="cpp1-symbol">(gtk_dialog_run(GTK_DIALOG(info)))
+  {
+</span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> GTK_RESPONSE_OK: 
+gtk_widget_destroy(info);
+  }
+  
+}
+</span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(fichier!=NULL)
+{
+
+quitter_editeur(fenetre);
+}
+gtk_main();
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> sauver_direct(GtkWidget *widget,gpointer* data)
+{
+GtkWidget *fenetre;
+FILE *fichier2;
+SDL_Rect posTemp;
+SDL_Rect posBloc_mini[</span><span class="cpp1-number">101</span><span class="cpp1-symbol">][</span><span class="cpp1-number">101</span><span class="cpp1-symbol">];
+posBloc_mini[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">; 
+posBloc_mini[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+SDL_Surface *ecranDeCapture;
+ecranDeCapture= SDL_CreateRGBSurface(SDL_HWSURFACE,NB_BLOCS_X*</span><span class="cpp1-number">10</span><span class="cpp1-symbol">,NB_BLOCS_Y*</span><span class="cpp1-number">10</span><span class="cpp1-symbol">, </span><span class="cpp1-number">32</span><span class="cpp1-symbol">, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+
+SDL_Surface *blanc_mini,*terre_mini,*herbe_mini,*eau_mini;
+SDL_Surface *ferme_allie_mini,*ferme_opposant_mini,*barriere_mini;
+SDL_Surface *fondu_terre_herbe_haut_mini,*fondu_herbe_terre_haut_mini,*fondu_herbe_terre_mini,*fondu_terre_herbe_mini;
+SDL_Surface *fondu_terre_eau_mini,*fondu_eau_terre_mini,*fondu_terre_eau_haut_mini,*fondu_eau_terre_haut_mini;
+SDL_Surface *fondu_eau_herbe_mini,*fondu_eau_herbe_haut_mini,*fondu_herbe_eau_mini,*fondu_herbe_eau_haut_mini;
+SDL_Surface *arbre_mini,*soldat_allie_mini,*soldat_ennemi_mini;
+blanc_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/blanc_mini.bmp&quot;</span><span class="cpp1-symbol">);
+terre_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/terre_mini.bmp&quot;</span><span class="cpp1-symbol">);
+herbe_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/herbe_mini.bmp&quot;</span><span class="cpp1-symbol">);
+arbre_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/arbre_mini.bmp&quot;</span><span class="cpp1-symbol">);
+
+fondu_terre_herbe_haut_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_terre_herbe_haut_mini.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_herbe_terre_haut_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_herbe_terre_haut_mini.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_herbe_terre_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_herbe_terre_mini.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_terre_herbe_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_terre_herbe_mini.bmp&quot;</span><span class="cpp1-symbol">);
+
+fondu_terre_eau_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_terre_eau_mini.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_eau_terre_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_eau_terre_mini.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_terre_eau_haut_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_terre_eau_haut_mini.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_eau_terre_haut_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_eau_terre_haut_mini.bmp&quot;</span><span class="cpp1-symbol">);
+
+fondu_eau_herbe_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_eau_herbe_mini.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_eau_herbe_haut_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_eau_herbe_haut_mini.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_herbe_eau_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_herbe_eau_mini.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_herbe_eau_haut_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_herbe_eau_haut_mini.bmp&quot;</span><span class="cpp1-symbol">);
+
+eau_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/eau_mini.bmp&quot;</span><span class="cpp1-symbol">);
+ferme_allie_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/ferme_allie_mini.bmp&quot;</span><span class="cpp1-symbol">);
+ferme_opposant_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/ferme_opposants_mini.bmp&quot;</span><span class="cpp1-symbol">);
+soldat_allie_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/soldat_allie_mini.bmp&quot;</span><span class="cpp1-symbol">);
+soldat_ennemi_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/soldat_ennemi_mini.bmp&quot;</span><span class="cpp1-symbol">);
+barriere_mini=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/barriere_mini.bmp&quot;</span><span class="cpp1-symbol">);
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+SDL_SetColorKey(ferme_opposant_mini, SDL_SRCCOLORKEY, SDL_MapRGB(ferme_opposant_mini-&gt;format, </span><span class="cpp1-number">255</span><span class="cpp1-symbol">, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">));
+SDL_SetColorKey(ferme_allie_mini, SDL_SRCCOLORKEY, SDL_MapRGB(ferme_allie_mini-&gt;format,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">255</span><span class="cpp1-symbol">));
+SDL_SetColorKey(barriere_mini, SDL_SRCCOLORKEY, SDL_MapRGB(barriere_mini-&gt;format,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">255</span><span class="cpp1-symbol">));
+SDL_SetColorKey(arbre_mini, SDL_SRCCOLORKEY, SDL_MapRGB(arbre_mini-&gt;format,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">255</span><span class="cpp1-symbol">));
+
+</span><span class="cpp1-reservedword">const</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">char</span><span class="cpp1-symbol">* recup=gtk_entry_get_text(GTK_ENTRY(data));
+</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> extension[</span><span class="cpp1-number">200</span><span class="cpp1-symbol">]=</span><span class="cpp1-string">&quot;&quot;</span><span class="cpp1-symbol">,extension2[</span><span class="cpp1-number">200</span><span class="cpp1-symbol">]=</span><span class="cpp1-string">&quot;&quot;</span><span class="cpp1-symbol">;
+FILE *fichier=NULL,*fichier1=NULL;
+
+
+
+
+</span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;=NB_BLOCS_X+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;i++)
+ {
+ </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;j&lt;=NB_BLOCS_Y;j++)
+  {
+  posBloc_mini[i+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][j].x= posBloc_mini[i][j].x+TAILLE_BLOC-</span><span class="cpp1-number">20</span><span class="cpp1-symbol">;
+  posBloc_mini[i][j+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">].x= posBloc_mini[i][j].x;
+  posBloc_mini[i+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][j].y= posBloc_mini[i][j].y;
+  posBloc_mini[i][j+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">].y= posBloc_mini[i][j].y+TAILLE_BLOC-</span><span class="cpp1-number">20</span><span class="cpp1-symbol">;   
+  }
+ }
+</span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;j&lt;=NB_BLOCS_X+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;j++)
+ {
+ </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;=NB_BLOCS_Y;i++)
+  {
+ </span><span class="cpp1-reservedword">switch</span><span class="cpp1-symbol">(posMatiere[i][j])
+   {
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_EAU_HERBE:
+   SDL_BlitSurface(fondu_eau_herbe_mini,NULL,ecranDeCapture,&amp;posBloc_mini[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_EAU_HERBE_HAUT:
+   SDL_BlitSurface(fondu_eau_herbe_haut_mini,NULL,ecranDeCapture,&amp;posBloc_mini[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_HERBE_EAU:
+   SDL_BlitSurface(fondu_herbe_eau_mini,NULL,ecranDeCapture,&amp;posBloc_mini[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_HERBE_EAU_HAUT:
+   SDL_BlitSurface(fondu_herbe_eau_haut_mini,NULL,ecranDeCapture,&amp;posBloc_mini[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_TERRE_EAU:
+   SDL_BlitSurface(fondu_terre_eau_mini,NULL,ecranDeCapture,&amp;posBloc_mini[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_TERRE_EAU_HAUT:
+   SDL_BlitSurface(fondu_terre_eau_haut_mini,NULL,ecranDeCapture,&amp;posBloc_mini[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_EAU_TERRE:
+   SDL_BlitSurface(fondu_eau_terre_mini,NULL,ecranDeCapture,&amp;posBloc_mini[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_EAU_TERRE_HAUT:
+   SDL_BlitSurface(fondu_eau_terre_haut_mini,NULL,ecranDeCapture,&amp;posBloc_mini[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_TERRE_HERBE_HAUT:
+   SDL_BlitSurface(fondu_terre_herbe_haut_mini,NULL,ecranDeCapture,&amp;posBloc_mini[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_HERBE_TERRE_HAUT:
+   SDL_BlitSurface(fondu_herbe_terre_haut_mini,NULL,ecranDeCapture,&amp;posBloc_mini[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_HERBE_TERRE:
+   SDL_BlitSurface(fondu_herbe_terre_mini,NULL,ecranDeCapture,&amp;posBloc_mini[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_TERRE_HERBE:
+   SDL_BlitSurface(fondu_terre_herbe_mini,NULL,ecranDeCapture,&amp;posBloc_mini[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> VIDE:
+   SDL_BlitSurface(blanc_mini,NULL,ecranDeCapture,&amp;posBloc_mini[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> TERRE:
+   SDL_BlitSurface(terre_mini,NULL,ecranDeCapture,&amp;posBloc_mini[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> HERBE:
+   SDL_BlitSurface(herbe_mini,NULL,ecranDeCapture,&amp;posBloc_mini[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> EAU:
+   SDL_BlitSurface(eau_mini,NULL,ecranDeCapture,&amp;posBloc_mini[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">; 
+    }
+   </span><span class="cpp1-reservedword">switch</span><span class="cpp1-symbol">(posBatiment[i][j])
+   {
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FERME_ALLIE:
+   SDL_BlitSurface(ferme_allie_mini,NULL,ecranDeCapture,&amp;posBloc_mini[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FERME_OPPOSANT:
+   SDL_BlitSurface(ferme_opposant_mini,NULL,ecranDeCapture,&amp;posBloc_mini[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> BARRIERE:
+   posTemp.x=posBloc_mini[i][j].x-barriere_mini-&gt;w+TAILLE_BLOC-</span><span class="cpp1-number">20</span><span class="cpp1-symbol">;
+   posTemp.y=posBloc_mini[i][j].y-barriere_mini-&gt;h+TAILLE_BLOC-</span><span class="cpp1-number">20</span><span class="cpp1-symbol">;
+   SDL_BlitSurface(barriere_mini,NULL,ecranDeCapture,&amp;posTemp);
+   initPos(&amp;posTemp);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> ARBRE:
+   posTemp.x=posBloc_mini[i][j].x;
+   posTemp.y=posBloc_mini[i][j].y-arbre_mini-&gt;h+TAILLE_BLOC-</span><span class="cpp1-number">20</span><span class="cpp1-symbol">;
+   SDL_BlitSurface(arbre_mini,NULL,ecranDeCapture,&amp;posTemp);
+   initPos(&amp;posTemp);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SOLDAT_ENNEMI:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-soldat_ennemi_mini-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(soldat_ennemi_mini,NULL,ecranDeCapture,&amp;posTemp);
+    initPos(&amp;posTemp);
+    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SOLDAT_ALLIE:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-soldat_allie_mini-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(soldat_allie_mini,NULL,ecranDeCapture,&amp;posTemp);
+    initPos(&amp;posTemp);
+    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">; 
+   }
+  } 
+}
+sprintf(extension,</span><span class="cpp1-string">&quot;%scapture.bmp&quot;</span><span class="cpp1-symbol">,recup);
+SDL_SaveBMP(ecranDeCapture,extension);
+
+sauvegarderNiveau(recup,posMatiere,posBatiment);
+
+
+fenetre=gtk_widget_get_toplevel(GTK_WIDGET(data));
+gtk_widget_destroy(fenetre);
+gtk_widget_destroy(GTK_WIDGET(data));
+gtk_widget_destroy(widget); 
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> initPos(SDL_Rect *pos)
+{
+pos-&gt;x=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+pos-&gt;y=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+}
+</span></span>
+</code></pre>
+</body>
+</html>

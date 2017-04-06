@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>credits_c.html</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="SynEdit HTML exporter" />
+<style type="text/css">
+<!--
+body { color: #000000; background-color: #FFFFFF; }
+.cpp1-assembler { color: #0000FF; }
+.cpp1-character { color: #000000; }
+.cpp1-comment { color: #316AC5; font-style: italic; }
+.cpp1-float { color: #800080; }
+.cpp1-hexadecimal { color: #800080; }
+.cpp1-identifier { color: #000000; }
+.cpp1-illegalchar { color: #000000; }
+.cpp1-number { color: #800080; }
+.cpp1-octal { color: #800080; }
+.cpp1-preprocessor { color: #008000; }
+.cpp1-reservedword { color: #000000; font-weight: bold; }
+.cpp1-space { background-color: #FFFFFF; color: #000000; }
+.cpp1-string { color: #FF0000; }
+.cpp1-symbol { color: #000000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<code><span style="font: 10pt Courier New;"><span class="cpp1-space"> </span><span class="cpp1-comment">/*
+  Nom: 
+  Copyright: 
+  Auteur: 
+  Date: 01/04/07 13:56
+  Description: 
+*/
+</span><span class="cpp1-preprocessor">#include &quot;credits.h&quot;
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> credits(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">)
+{
+GtkWidget *fenetre;       
+GtkWidget *valider;       
+GtkWidget *vBox;  
+GtkWidget *label; 
+fenetre = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+gtk_window_set_position(GTK_WINDOW(fenetre), GTK_WIN_POS_CENTER);
+gtk_window_set_default_size(GTK_WINDOW(fenetre), </span><span class="cpp1-number">320</span><span class="cpp1-symbol">, </span><span class="cpp1-number">200</span><span class="cpp1-symbol">);
+gtk_window_set_title(GTK_WINDOW(fenetre), </span><span class="cpp1-string">&quot;Aukwar&quot;</span><span class="cpp1-symbol">);
+
+vBox=gtk_vbox_new(TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+gtk_container_add(GTK_CONTAINER(fenetre),vBox);
+
+label=gtk_label_new(</span><span class="cpp1-string">&quot;prog:\n-cendre\n-bobs\n-masterdr14\n&quot;</span><span class="cpp1-symbol">);
+gtk_box_pack_start(GTK_BOX(vBox),label, FALSE, FALSE, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+gtk_label_set_markup(GTK_LABEL(label), </span><span class="cpp1-string">&quot;&lt;span font_desc=\&quot;Arial 15\&quot;&gt;&lt;b&gt;Programmation C/C++:&lt;/b&gt;&lt;/span&gt;\n&quot;
+&quot;&lt;span font_desc=\&quot;Arial 15\&quot; foreground=\&quot;#0000FF\&quot;&gt;-Bobs\n-Masterdr14\n-Cendre\n\n&lt;/span&gt;\n&lt;span font_desc=\&quot;Arial 15\&quot;&gt;&lt;b&gt;Programmation PHP/HTML:&lt;/b&gt;&lt;/span&gt;\n&quot;
+&quot;&lt;span font_desc=\&quot;Arial 15\&quot; foreground=\&quot;#0000FF\&quot;&gt;-Amras(Kevin88)\n\n&lt;/span&gt;\n&quot;&quot;&lt;span font_desc=\&quot;Arial 15\&quot;&gt;&lt;b&gt;Graphismes:&lt;/b&gt;&lt;/span&gt;\n&quot;&quot;&lt;span font_desc=\&quot;Arial 15\&quot; foreground=\&quot;#0000FF\&quot;&gt;-Sniper88\n\n&lt;/span&gt;\n&quot;&quot;&lt;span font_desc=\&quot;Arial 10\&quot; foreground=\&quot;#0000FF\&quot;&gt;ce programme est sous lisence GPL\n et doit etre acompagne de sa license sous le nom license_GPL.txt \npour connaitre les droit de distributions de ce logiciel lisez ce texte.&lt;/span&gt;&quot;</span><span class="cpp1-symbol">);
+
+valider=gtk_button_new_from_stock(</span><span class="cpp1-string">&quot;OK&quot;</span><span class="cpp1-symbol">);
+gtk_box_pack_start(GTK_BOX(vBox),valider, FALSE, FALSE, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+g_signal_connect(G_OBJECT(valider), </span><span class="cpp1-string">&quot;clicked&quot;</span><span class="cpp1-symbol">, G_CALLBACK(Quitter), fenetre);
+
+gtk_widget_show_all(fenetre);
+gtk_main();
+}
+</span></span>
+</code></pre>
+</body>
+</html>

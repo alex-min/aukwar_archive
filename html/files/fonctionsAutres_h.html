@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>fonctionsAutres_h.html</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="SynEdit HTML exporter" />
+<style type="text/css">
+<!--
+body { color: #000000; background-color: #FFFFFF; }
+.cpp1-assembler { color: #0000FF; }
+.cpp1-character { color: #000000; }
+.cpp1-comment { color: #316AC5; font-style: italic; }
+.cpp1-float { color: #800080; }
+.cpp1-hexadecimal { color: #800080; }
+.cpp1-identifier { color: #000000; }
+.cpp1-illegalchar { color: #000000; }
+.cpp1-number { color: #800080; }
+.cpp1-octal { color: #800080; }
+.cpp1-preprocessor { color: #008000; }
+.cpp1-reservedword { color: #000000; font-weight: bold; }
+.cpp1-space { background-color: #FFFFFF; color: #000000; }
+.cpp1-string { color: #FF0000; }
+.cpp1-symbol { color: #000000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<code><span style="font: 10pt Courier New;"><span class="cpp1-space"> </span><span class="cpp1-comment">/*
+  Nom: 
+  Copyright: 
+  Auteur: 
+  Date: 01/04/07 13:56
+  Description: 
+*/
+</span><span class="cpp1-preprocessor">#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt; 
+#include &lt;string.h&gt;
+#include &quot;jeu.h&quot;
+#define ERR_FICHIER_ABS -1
+#define OK 0
+
+</span><span class="cpp1-comment">//fonction qui charge option.opt
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> chargerOptions(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> *volumeMusique,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> *volumeBruitage);
+
+</span><span class="cpp1-comment">//charger une partie .SAV
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> chargerpartie(</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *nomFichier,</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *difficulte,</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *race,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> *nbMaisons,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> *nbUnite,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">*nbFermes);
+
+</span><span class="cpp1-comment">//sauvegarder une partie en .SAV
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> sauverPartie(</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *nomFichier,</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *difficulte,</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *race,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nbMaisons,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nbUnite,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nbFermes);
+
+</span><span class="cpp1-comment">//fonction de xoring (pour le cryptage)
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> xoring(FILE *fichier1,FILE*fichier2,</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> cle[</span><span class="cpp1-number">35</span><span class="cpp1-symbol">]);
+
+</span><span class="cpp1-comment">//charger des niveaux .NIV
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> chargerNiveau(</span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *nom,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> posMatiere[][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">],</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> posBatiment[][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">]); 
+
+</span><span class="cpp1-comment">//sauvegarder des niveaux en .NIV
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> sauvegarderNiveau(</span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *nom,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> posMatiere[][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">],</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> posBatiment[][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">]); 
+</span></span>
+</code></pre>
+</body>
+</html>

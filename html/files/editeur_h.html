@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>editeur_h.html</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="SynEdit HTML exporter" />
+<style type="text/css">
+<!--
+body { color: #000000; background-color: #FFFFFF; }
+.cpp1-assembler { color: #0000FF; }
+.cpp1-character { color: #000000; }
+.cpp1-comment { color: #316AC5; font-style: italic; }
+.cpp1-float { color: #800080; }
+.cpp1-hexadecimal { color: #800080; }
+.cpp1-identifier { color: #000000; }
+.cpp1-illegalchar { color: #000000; }
+.cpp1-number { color: #800080; }
+.cpp1-octal { color: #800080; }
+.cpp1-preprocessor { color: #008000; }
+.cpp1-reservedword { color: #000000; font-weight: bold; }
+.cpp1-space { background-color: #FFFFFF; color: #000000; }
+.cpp1-string { color: #FF0000; }
+.cpp1-symbol { color: #000000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<code><span style="font: 10pt Courier New;"><span class="cpp1-preprocessor">#ifndef DEF_EDITEUR_H
+#define DEF_EDITEUR_H 
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;gtk/gtk.h&gt;
+#include &lt;SDL\SDL.h&gt;
+#include &quot;nouvellePartie.h&quot; 
+#include &quot;fonctionsAutres.h&quot;
+#define TAILLE_BLOC 30
+#define NB_BLOCS_AFFICHABLE_X 30 
+#define NB_BLOCS_AFFICHABLE_Y 20 
+#define LARGEUR_FENETRE NB_BLOCS_AFFICHABLE_X*TAILLE_BLOC
+#define HAUTEUR_FENETRE NB_BLOCS_AFFICHABLE_Y*TAILLE_BLOC
+#define VIDE                0
+#define TERRE               1
+#define HERBE               2  
+#define EAU                 3 
+#define FERME_ALLIE         4 
+#define FERME_OPPOSANT      5  
+#define BATIMENTS_ALLIE     6
+#define BATIMENTS_OPPOSANT  8 
+#define BARRIERE            7 
+#define ARBRE               9
+#define FONDU_HERBE_TERRE  -3
+#define FONDU_TERRE_HERBE  -2
+#define FONDU_TERRE_HERBE_HAUT -1
+#define FONDU_HERBE_TERRE_HAUT -8
+#define FONDU_EAU_TERRE 10
+#define FONDU_TERRE_EAU 11
+#define FONDU_TERRE_EAU_HAUT 12
+#define FONDU_EAU_TERRE_HAUT 13
+#define FONDU_HERBE_EAU 14
+#define FONDU_EAU_HERBE 15
+#define FONDU_HERBE_EAU_HAUT 16
+#define FONDU_EAU_HERBE_HAUT  17
+#define SOLDAT_ALLIE  19
+#define SOLDAT_ENNEMI 18
+</span><span class="cpp1-comment">//***********************
+/*
+#define IMG0  'a'
+#define IMG1  'z'
+#define IMG2  'e'
+#define IMG3  'r'
+#define IMG4  't'
+#define IMG5  'y'
+#define IMG6  'u'
+#define IMG7  'i'
+#define IMG8  'o'
+#define IMG9  'p'
+#define IMG10 'q'
+#define IMG11 's'
+#define IMG12 'd'
+#define IMG13 'f'
+#define IMG14 'g'
+#define IMG15 'h'
+#define IMG16 'j'
+#define IMG17 'k'
+#define IMG18 'w'
+#define IMG19 'x'
+*/
+//***********************
+
+
+//lancement de l editeur de niveaux
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> editeurNiv(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">);
+
+</span><span class="cpp1-comment">//afficher les blocs  avec timer 
+</span><span class="cpp1-identifier">Uint32 afficherCarte(Uint32 intervalle, </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *parametre);
+
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> sauvegarderNiv(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">);
+  
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> quitter_editeur(gpointer data);
+     
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> sauver_texte(GtkWidget *widget,gpointer data);
+
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> chargerNiv(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">);
+
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> charger_texte(GtkWidget *widget,gpointer data); 
+
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> sauver_direct(GtkWidget *widget,gpointer* data);
+
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> initPos(SDL_Rect *pos);
+
+</span><span class="cpp1-preprocessor">#endif
+</span></span>
+</code></pre>
+</body>
+</html>

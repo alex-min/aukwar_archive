@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>jeu_c.html</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="SynEdit HTML exporter" />
+<style type="text/css">
+<!--
+body { color: #000000; background-color: #FFFFFF; }
+.cpp1-assembler { color: #0000FF; }
+.cpp1-character { color: #000000; }
+.cpp1-comment { color: #316AC5; font-style: italic; }
+.cpp1-float { color: #800080; }
+.cpp1-hexadecimal { color: #800080; }
+.cpp1-identifier { color: #000000; }
+.cpp1-illegalchar { color: #000000; }
+.cpp1-number { color: #800080; }
+.cpp1-octal { color: #800080; }
+.cpp1-preprocessor { color: #008000; }
+.cpp1-reservedword { color: #000000; font-weight: bold; }
+.cpp1-space { background-color: #FFFFFF; color: #000000; }
+.cpp1-string { color: #FF0000; }
+.cpp1-symbol { color: #000000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<code><span style="font: 10pt Courier New;"><span class="cpp1-preprocessor">#include &quot;jeu.h&quot;
+</span><span class="cpp1-reservedword">static</span><span class="cpp1-space">  SDL_Rect posBloc[</span><span class="cpp1-number">500</span><span class="cpp1-symbol">][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">];
+</span><span class="cpp1-reservedword">static</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> posMatiere[</span><span class="cpp1-number">500</span><span class="cpp1-symbol">][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">]={VIDE};
+</span><span class="cpp1-reservedword">static</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> posBatiment[</span><span class="cpp1-number">500</span><span class="cpp1-symbol">][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">]={VIDE}; 
+</span><span class="cpp1-reservedword">static</span><span class="cpp1-space">  Joueur ia;
+
+SDL_Surface *ecran = NULL; 
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> pause();
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> jeu(</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *nomPartie)
+{
+    
+    SDL_Surface *barre,*score;
+    barre=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/barre.bmp&quot;</span><span class="cpp1-symbol">);
+    score=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/carre.bmp&quot;</span><span class="cpp1-symbol">);
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(TTF_Init() == -</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)
+{
+    fprintf(stderr, </span><span class="cpp1-string">&quot;Erreur d'initialisation de TTF_Init : %s\n&quot;</span><span class="cpp1-symbol">, TTF_GetError());
+    exit(EXIT_FAILURE);
+}
+    SDL_Surface  *texteOr = NULL,*textePtsVictoire=NULL,*textePopulation=NULL;
+    SDL_Surface *texteBois=NULL,*texteFer=NULL,*texteNourriture=NULL;
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
+    ecran = SDL_SetVideoMode(LARGEUR_FENETRE, HAUTEUR_FENETRE+</span><span class="cpp1-number">100</span><span class="cpp1-symbol">, </span><span class="cpp1-number">32</span><span class="cpp1-symbol">, SDL_HWSURFACE|SDL_FULLSCREEN);
+    SDL_WM_SetCaption(</span><span class="cpp1-string">&quot;Aukwar&quot;</span><span class="cpp1-symbol">, NULL); 
+    </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,g=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+    FILE *fichier=NULL;
+    Joueur joueur;
+   
+    initJoueur(&amp;joueur);
+    initJoueur(&amp;ia);
+
+TTF_Font *police = NULL;
+
+
+SDL_Color couleurNoire = {</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">};
+SDL_Color couleurBleu = {</span><span class="cpp1-number">39</span><span class="cpp1-symbol">,</span><span class="cpp1-number">5</span><span class="cpp1-symbol">,</span><span class="cpp1-number">228</span><span class="cpp1-symbol">};
+SDL_Color couleurRouge = {</span><span class="cpp1-number">255</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">};
+SDL_Color couleurOrange = {</span><span class="cpp1-number">255</span><span class="cpp1-symbol">,</span><span class="cpp1-number">128</span><span class="cpp1-symbol">,</span><span class="cpp1-number">64</span><span class="cpp1-symbol">};
+SDL_Color couleurVerte = {</span><span class="cpp1-number">67</span><span class="cpp1-symbol">,</span><span class="cpp1-number">204</span><span class="cpp1-symbol">,</span><span class="cpp1-number">21</span><span class="cpp1-symbol">};
+SDL_Color couleurEssai = {</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">};
+
+police = TTF_OpenFont(</span><span class="cpp1-string">&quot;data/police.ttf&quot;</span><span class="cpp1-symbol">,</span><span class="cpp1-number">20</span><span class="cpp1-symbol">);
+
+
+
+SDL_Surface *blanc,*terre,*herbe,*eau,*ferme_allie,*ferme_opposant,*barriere,*choixSurface=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+SDL_Surface *choixSurfaceRectangle,*fondu_herbe_terre,*fondu_terre_herbe,*fondu_terre_herbe_haut,*fondu_herbe_terre_haut;
+SDL_Surface *fondu_eau_terre,*fondu_terre_eau,*fondu_terre_eau_haut,*fondu_eau_terre_haut;
+SDL_Surface *fondu_herbe_eau,*fondu_eau_herbe,*fondu_herbe_eau_haut,*fondu_eau_herbe_haut;
+SDL_Surface *large,*arbre,*soldat_allie,*soldat_ennemi;
+SDL_Rect positiontext,posBarre;
+
+posBarre.x=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">; 
+posBarre.y=HAUTEUR_FENETRE;
+blanc=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/blanc.bmp&quot;</span><span class="cpp1-symbol">);
+terre=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/terre.bmp&quot;</span><span class="cpp1-symbol">);
+herbe=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/herbe.bmp&quot;</span><span class="cpp1-symbol">);
+eau=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/eau.bmp&quot;</span><span class="cpp1-symbol">); 
+
+fondu_herbe_terre=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_herbe_terre.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_terre_herbe=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_terre_herbe.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_terre_herbe_haut=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_terre_herbe_haut.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_herbe_terre_haut=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_herbe_terre_haut.bmp&quot;</span><span class="cpp1-symbol">);
+
+fondu_eau_terre=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_eau_terre.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_terre_eau=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_terre_eau.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_terre_eau_haut=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_terre_eau_haut.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_eau_terre_haut=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_eau_terre_haut.bmp&quot;</span><span class="cpp1-symbol">);
+
+fondu_herbe_eau=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_herbe_eau.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_eau_herbe=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_eau_herbe.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_herbe_eau_haut=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_herbe_eau_haut.bmp&quot;</span><span class="cpp1-symbol">);
+fondu_eau_herbe_haut=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/fondu_eau_herbe_haut.bmp&quot;</span><span class="cpp1-symbol">);
+
+barriere=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/barriere.bmp&quot;</span><span class="cpp1-symbol">);
+ferme_allie=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/ferme_allie.bmp&quot;</span><span class="cpp1-symbol">);
+ferme_opposant=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/ferme_opposants.bmp&quot;</span><span class="cpp1-symbol">);
+large=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/large.bmp&quot;</span><span class="cpp1-symbol">);
+choixSurfaceRectangle=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/choix.bmp&quot;</span><span class="cpp1-symbol">);
+arbre=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/arbre.bmp&quot;</span><span class="cpp1-symbol">);
+soldat_allie=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/soldat_allie.bmp&quot;</span><span class="cpp1-symbol">);
+soldat_ennemi=SDL_LoadBMP(</span><span class="cpp1-string">&quot;data/images/soldat_ennemi.bmp&quot;</span><span class="cpp1-symbol">);
+
+</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> chaineOr[</span><span class="cpp1-number">200</span><span class="cpp1-symbol">]=</span><span class="cpp1-string">&quot;&quot;</span><span class="cpp1-symbol">,chainePtsVictoire[</span><span class="cpp1-number">200</span><span class="cpp1-symbol">]=</span><span class="cpp1-string">&quot;&quot;</span><span class="cpp1-symbol">,chainePopulation[</span><span class="cpp1-number">200</span><span class="cpp1-symbol">]=</span><span class="cpp1-string">&quot;&quot;</span><span class="cpp1-symbol">,chaineBois[</span><span class="cpp1-number">200</span><span class="cpp1-symbol">]=</span><span class="cpp1-string">&quot;&quot;</span><span class="cpp1-symbol">;
+</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> chaineFer[</span><span class="cpp1-number">200</span><span class="cpp1-symbol">]=</span><span class="cpp1-string">&quot;&quot;</span><span class="cpp1-symbol">,chaineNourriture[</span><span class="cpp1-number">200</span><span class="cpp1-symbol">]=</span><span class="cpp1-string">&quot;&quot;</span><span class="cpp1-symbol">;
+
+  
+SDL_SetColorKey(ferme_opposant, SDL_SRCCOLORKEY, SDL_MapRGB(ferme_opposant-&gt;format, </span><span class="cpp1-number">255</span><span class="cpp1-symbol">, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">));
+SDL_SetColorKey(ferme_allie, SDL_SRCCOLORKEY, SDL_MapRGB(ferme_allie-&gt;format,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">255</span><span class="cpp1-symbol">));
+SDL_SetColorKey(barriere, SDL_SRCCOLORKEY, SDL_MapRGB(barriere-&gt;format,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">255</span><span class="cpp1-symbol">));
+SDL_SetColorKey(arbre, SDL_SRCCOLORKEY, SDL_MapRGB(arbre-&gt;format,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">255</span><span class="cpp1-symbol">));
+
+
+SDL_Rect posSouris,posTemp,posSelect,posLarge,posChoix,posScore,posPts;
+SDL_Rect posPtsVictoire,posPopulation,posBois,posFer,posNourriture;
+
+posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x=NB_BLOCS_X;
+posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y=NB_BLOCS_Y/</span><span class="cpp1-number">2</span><span class="cpp1-symbol">;
+
+posLarge.x=</span><span class="cpp1-number">900</span><span class="cpp1-symbol">;
+posLarge.y=</span><span class="cpp1-number">900</span><span class="cpp1-symbol">;
+
+posChoix.x=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+posChoix.y=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+posScore.x=</span><span class="cpp1-number">800</span><span class="cpp1-symbol">;
+posScore.y=HAUTEUR_FENETRE;
+
+posPts.x=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+posPts.y=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+posPtsVictoire.x=</span><span class="cpp1-number">595</span><span class="cpp1-symbol">;
+posPtsVictoire.y=HAUTEUR_FENETRE+</span><span class="cpp1-number">40</span><span class="cpp1-symbol">;
+
+posPopulation.x=</span><span class="cpp1-number">455</span><span class="cpp1-symbol">;
+posPopulation.y=HAUTEUR_FENETRE+</span><span class="cpp1-number">40</span><span class="cpp1-symbol">;
+
+posBois.x=</span><span class="cpp1-number">355</span><span class="cpp1-symbol">;
+posBois.y=HAUTEUR_FENETRE+</span><span class="cpp1-number">40</span><span class="cpp1-symbol">;
+
+posFer.x=</span><span class="cpp1-number">95</span><span class="cpp1-symbol">;
+posFer.y=HAUTEUR_FENETRE+</span><span class="cpp1-number">40</span><span class="cpp1-symbol">;
+
+posNourriture.x=</span><span class="cpp1-number">185</span><span class="cpp1-symbol">;
+posNourriture.y=HAUTEUR_FENETRE+</span><span class="cpp1-number">40</span><span class="cpp1-symbol">;
+
+positiontext.x =</span><span class="cpp1-number">11</span><span class="cpp1-symbol">;
+positiontext.y = HAUTEUR_FENETRE+</span><span class="cpp1-number">40</span><span class="cpp1-symbol">; 
+
+SDL_TimerID timer;
+timer = SDL_AddTimer(</span><span class="cpp1-number">150</span><span class="cpp1-symbol">,afficherCarteJeu,&amp;posSouris); 
+         
+
+    
+    fichier=fopen(</span><span class="cpp1-string">&quot;data/niveaux/map03.niv&quot;</span><span class="cpp1-symbol">,</span><span class="cpp1-string">&quot;r&quot;</span><span class="cpp1-symbol">);
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(fichier!=NULL)
+    {
+    fclose(fichier);
+    chargerNiveau(</span><span class="cpp1-string">&quot;data/niveaux/map03.niv&quot;</span><span class="cpp1-symbol">,posMatiere,posBatiment);
+    }
+  
+    </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> continuer = </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+    SDL_Event event;
+
+    </span><span class="cpp1-reservedword">while</span><span class="cpp1-space"> (continuer)
+    {
+      
+      sprintf(chainePopulation,</span><span class="cpp1-string">&quot;Population:%ld&quot;</span><span class="cpp1-symbol">,joueur.nbPopulation);
+      sprintf(chainePtsVictoire,</span><span class="cpp1-string">&quot;Pts De Victoire:%ld&quot;</span><span class="cpp1-symbol">,joueur.nbPtsVictoire);
+      sprintf(chaineOr,</span><span class="cpp1-string">&quot;Or:%ld&quot;</span><span class="cpp1-symbol">,joueur.nbOr);
+      sprintf(chaineBois,</span><span class="cpp1-string">&quot;Bois:%ld&quot;</span><span class="cpp1-symbol">,joueur.nbBois);
+      sprintf(chaineFer,</span><span class="cpp1-string">&quot;fer:%ld&quot;</span><span class="cpp1-symbol">,joueur.nbFer);
+      sprintf(chaineNourriture,</span><span class="cpp1-string">&quot;Nourriture:%ld&quot;</span><span class="cpp1-symbol">,joueur.nbNourriture);
+      
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(joueur.nbOr&gt;=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)
+      texteOr = TTF_RenderText_Blended(police,chaineOr, couleurNoire);
+      </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">      texteOr = TTF_RenderText_Blended(police,chaineOr, couleurRouge);
+    
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(joueur.nbFer&gt;=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)
+      texteFer = TTF_RenderText_Blended(police,chaineFer, couleurNoire);
+      </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">      texteFer = TTF_RenderText_Blended(police,chaineFer, couleurRouge);
+     
+       </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(joueur.nbNourriture&gt;=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)
+      texteNourriture = TTF_RenderText_Blended(police,chaineNourriture, couleurNoire);
+      </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">      texteNourriture= TTF_RenderText_Blended(police,chaineNourriture, couleurRouge);
+     
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(joueur.nbPtsVictoire&gt;</span><span class="cpp1-number">170</span><span class="cpp1-symbol">)
+      textePtsVictoire=TTF_RenderText_Blended(police,chainePtsVictoire,couleurVerte);
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(joueur.nbPtsVictoire&gt;</span><span class="cpp1-number">70</span><span class="cpp1-space"> &amp;&amp; joueur.nbPtsVictoire&lt;</span><span class="cpp1-number">170</span><span class="cpp1-symbol">)
+      textePtsVictoire=TTF_RenderText_Blended(police,chainePtsVictoire,couleurBleu);
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(joueur.nbPtsVictoire&lt;</span><span class="cpp1-number">70</span><span class="cpp1-space"> &amp;&amp; joueur.nbPtsVictoire&gt;</span><span class="cpp1-number">20</span><span class="cpp1-symbol">)
+      textePtsVictoire=TTF_RenderText_Blended(police,chainePtsVictoire,couleurOrange);
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(joueur.nbPtsVictoire&lt;</span><span class="cpp1-number">20</span><span class="cpp1-symbol">)
+      textePtsVictoire=TTF_RenderText_Blended(police,chainePtsVictoire,couleurRouge);
+      
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(joueur.nbPopulation&gt;</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)
+      textePopulation=TTF_RenderText_Blended(police,chainePopulation,couleurNoire);
+      </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">      textePopulation=TTF_RenderText_Blended(police,chainePopulation,couleurRouge);
+      
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(joueur.nbBois&gt;=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)
+      {
+      texteBois=TTF_RenderText_Blended(police,chaineBois,couleurNoire);
+      }
+      </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">      {
+      texteBois=TTF_RenderText_Blended(police,chaineBois,couleurRouge);
+      }
+      
+      
+      SDL_PollEvent(&amp;event);
+     
+        </span><span class="cpp1-reservedword">switch</span><span class="cpp1-symbol">(event.type)
+        {
+           
+            </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDL_QUIT:
+            continuer = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+            posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+            posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+            </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;NB_BLOCS_X;i++)
+             {
+             </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;j&lt;NB_BLOCS_Y;j++)
+              {
+              posMatiere[i][j]=VIDE;
+              posBatiment[i][j]=VIDE;
+              }
+             }
+            
+            </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+            </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDL_MOUSEMOTION:
+                 posSouris.x=event.motion.x;
+                 posSouris.y=event.motion.y;    
+            </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+            </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDL_KEYDOWN:
+            </span><span class="cpp1-reservedword">switch</span><span class="cpp1-symbol">(event.key.keysym.sym)
+            {
+            </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDLK_ESCAPE:
+            continuer=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+            posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+            posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+            </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;NB_BLOCS_X;i++)
+             {
+             </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;j&lt;NB_BLOCS_Y;j++)
+              {
+              posMatiere[i][j]=VIDE;
+              posBatiment[i][j]=VIDE;
+              }
+             }
+             </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+             </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDLK_o:
+             joueur.nbOr+=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+             joueur.nbPtsVictoire+=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+             joueur.nbPopulation+=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+             joueur.nbBois+=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+             joueur.nbFer+=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+             joueur.nbNourriture+=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+             </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+             </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SDLK_l:
+             joueur.nbOr-=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+             joueur.nbPtsVictoire-=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+             joueur.nbPopulation-=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+             joueur.nbBois-=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+             joueur.nbFer-=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+             joueur.nbNourriture-=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+             </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(joueur.nbPtsVictoire&lt;</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)
+             joueur.nbPtsVictoire=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+             </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(joueur.nbPopulation&lt;</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)
+             joueur.nbPopulation=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+             </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+             </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(joueur.nbBois&lt;-</span><span class="cpp1-number">100</span><span class="cpp1-symbol">)
+             joueur.nbBois=-</span><span class="cpp1-number">99</span><span class="cpp1-symbol">;
+             </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(joueur.nbOr&lt;-</span><span class="cpp1-number">100</span><span class="cpp1-symbol">)
+             joueur.nbOr=-</span><span class="cpp1-number">99</span><span class="cpp1-symbol">;
+             </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(joueur.nbNourriture&lt;-</span><span class="cpp1-number">100</span><span class="cpp1-symbol">)
+             joueur.nbNourriture=-</span><span class="cpp1-number">99</span><span class="cpp1-symbol">;
+            }
+        }
+       
+ SDL_FillRect(ecran, NULL, SDL_MapRGB(ecran-&gt;format,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">));
+</span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;=NB_BLOCS_X;i++)
+ {
+  </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;j&lt;=NB_BLOCS_Y;j++)
+  {
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">((posBloc[i][j].x&gt;-TAILLE_BLOC/</span><span class="cpp1-number">4</span><span class="cpp1-space"> &amp;&amp; posBloc[i][j].x&lt;LARGEUR_FENETRE)&amp;&amp;(posBloc[i][j].y&gt;-TAILLE_BLOC/</span><span class="cpp1-number">4</span><span class="cpp1-space"> &amp;&amp; posBloc[i][j].y&lt;HAUTEUR_FENETRE))
+   {
+   </span><span class="cpp1-reservedword">switch</span><span class="cpp1-symbol">(posMatiere[i][j])
+   {
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_HERBE_EAU_HAUT:
+   SDL_BlitSurface(fondu_herbe_eau_haut,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_EAU_HERBE_HAUT:
+   SDL_BlitSurface(fondu_eau_herbe_haut,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_EAU_HERBE:
+   SDL_BlitSurface(fondu_eau_herbe,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_HERBE_EAU:
+   SDL_BlitSurface(fondu_herbe_eau,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_EAU_TERRE_HAUT:
+   SDL_BlitSurface(fondu_eau_terre_haut,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_TERRE_EAU_HAUT:
+   SDL_BlitSurface(fondu_terre_eau_haut,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_TERRE_EAU:
+   SDL_BlitSurface(fondu_terre_eau,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_EAU_TERRE: 
+   SDL_BlitSurface(fondu_eau_terre,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_TERRE_HERBE_HAUT:
+   SDL_BlitSurface(fondu_terre_herbe_haut,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_HERBE_TERRE_HAUT: 
+   SDL_BlitSurface(fondu_herbe_terre_haut,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_HERBE_TERRE:
+   SDL_BlitSurface(fondu_herbe_terre,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FONDU_TERRE_HERBE:
+   SDL_BlitSurface(fondu_terre_herbe,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> VIDE:
+   SDL_BlitSurface(blanc,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;  
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> TERRE:
+   SDL_BlitSurface(terre,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> HERBE:
+   SDL_BlitSurface(herbe,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> EAU:
+   SDL_BlitSurface(eau,NULL,ecran,&amp;posBloc[i][j]);
+   </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+   
+    }
+   }
+  }
+ }
+  </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;=NB_BLOCS_X;i++)
+ {
+  </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;j&lt;=NB_BLOCS_Y;j++)
+  {
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">((posBloc[i][j].x&gt;-TAILLE_BLOC/</span><span class="cpp1-number">4</span><span class="cpp1-space"> &amp;&amp; posBloc[i][j].x&lt;LARGEUR_FENETRE)&amp;&amp;(posBloc[i][j].y&gt;-TAILLE_BLOC/</span><span class="cpp1-number">4</span><span class="cpp1-space"> &amp;&amp; posBloc[i][j].y&lt;HAUTEUR_FENETRE))
+   {
+  </span><span class="cpp1-reservedword">switch</span><span class="cpp1-symbol">(posBatiment[i][j])
+    {
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FERME_ALLIE:
+    SDL_BlitSurface(ferme_allie,NULL,ecran,&amp;posBloc[i][j]);
+    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FERME_OPPOSANT:
+    SDL_BlitSurface(ferme_opposant,NULL,ecran,&amp;posBloc[i][j]);
+    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> BARRIERE:
+    posTemp.x=posBloc[i][j].x-barriere-&gt;w+TAILLE_BLOC;
+    posTemp.y=posBloc[i][j].y-barriere-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(barriere,NULL,ecran,&amp;posTemp);
+    initPosJeu(&amp;posTemp);
+    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> ARBRE:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-arbre-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(arbre,NULL,ecran,&amp;posTemp);
+    initPosJeu(&amp;posTemp);
+    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+     </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SOLDAT_ALLIE:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-soldat_allie-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(soldat_allie,NULL,ecran,&amp;posTemp);
+    initPosJeu(&amp;posTemp);
+    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+     </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SOLDAT_ENNEMI:
+    posTemp.x=posBloc[i][j].x;
+    posTemp.y=posBloc[i][j].y-soldat_ennemi-&gt;h+TAILLE_BLOC;
+    SDL_BlitSurface(soldat_ennemi,NULL,ecran,&amp;posTemp);
+    initPosJeu(&amp;posTemp);
+    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">default</span><span class="cpp1-symbol">:
+    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    }
+   }
+  }
+ }
+actionia(posMatiere,posBatiment,&amp;ia);
+SDL_BlitSurface(barre,NULL,ecran,&amp;posBarre);
+SDL_BlitSurface(score,NULL,ecran,&amp;posScore);
+SDL_BlitSurface(score,NULL,ecran,&amp;posPts);
+
+SDL_BlitSurface(texteOr, NULL, ecran, &amp;positiontext);
+SDL_BlitSurface(textePtsVictoire, NULL,ecran,&amp;posPtsVictoire);
+SDL_BlitSurface(textePopulation, NULL,ecran,&amp;posPopulation);
+SDL_BlitSurface(texteBois, NULL,ecran,&amp;posBois);
+SDL_BlitSurface(texteFer, NULL,ecran,&amp;posFer);
+SDL_BlitSurface(texteNourriture, NULL,ecran,&amp;posNourriture);
+
+SDL_BlitSurface(large,NULL,ecran,&amp;posLarge);
+initPosJeu(&amp;posSelect);
+SDL_Flip(ecran);
+
+    }
+    TTF_CloseFont(police);
+    TTF_Quit();
+    SDL_Quit();
+    </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> EXIT_SUCCESS;
+}
+Uint32 afficherCarteJeu(Uint32 intervalle, </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *parametre)
+{
+SDL_Rect *posSouris=(SDL_Rect*)parametre;
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posSouris-&gt;x&lt;TAILLE_BLOC/</span><span class="cpp1-number">4</span><span class="cpp1-symbol">)
+ {
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x &lt;TAILLE_BLOC*</span><span class="cpp1-number">2</span><span class="cpp1-symbol">)
+  {
+ posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x+=TAILLE_BLOC;
+  }
+ }
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posSouris-&gt;x&gt;LARGEUR_FENETRE-(TAILLE_BLOC/</span><span class="cpp1-number">2</span><span class="cpp1-symbol">)&amp;&amp; (posBloc[NB_BLOCS_X][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x&gt;LARGEUR_FENETRE-(</span><span class="cpp1-number">3</span><span class="cpp1-symbol">*TAILLE_BLOC)))
+ {
+ posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].x-=TAILLE_BLOC;
+ }
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posSouris-&gt;y&lt;TAILLE_BLOC &amp;&amp; (posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y &lt;TAILLE_BLOC*</span><span class="cpp1-number">2</span><span class="cpp1-symbol">))
+ {
+ posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y+=TAILLE_BLOC;
+ }
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posSouris-&gt;y&gt;HAUTEUR_FENETRE-(TAILLE_BLOC/</span><span class="cpp1-number">2</span><span class="cpp1-symbol">) &amp;&amp; (posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][NB_BLOCS_Y].y&gt;HAUTEUR_FENETRE-(</span><span class="cpp1-number">3</span><span class="cpp1-symbol">*TAILLE_BLOC)))
+ {
+ posBloc[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">][</span><span class="cpp1-number">0</span><span class="cpp1-symbol">].y-=TAILLE_BLOC;
+ }
+</span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;=NB_BLOCS_X+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;i++)
+ {
+ </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;j&lt;=NB_BLOCS_Y;j++)
+  {
+  posBloc[i+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][j].x= posBloc[i][j].x+TAILLE_BLOC;
+  posBloc[i][j+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">].x= posBloc[i][j].x;
+  posBloc[i+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][j].y= posBloc[i][j].y;
+  posBloc[i][j+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">].y= posBloc[i][j].y+TAILLE_BLOC;   
+  }   
+ }
+actionia( posMatiere, posBatiment,&amp;ia);
+</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> intervalle;
+
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> initPosJeu(SDL_Rect *pos)
+{
+pos-&gt;x=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+pos-&gt;y=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+}
+
+</span></span>
+</code></pre>
+</body>
+</html>

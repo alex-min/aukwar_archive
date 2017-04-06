@@ -1,0 +1,57 @@
+# Project: Projet1
+# Makefile created by Dev-C++ 4.9.9.2
+
+CPP  = g++.exe
+CC   = gcc.exe
+WINDRES = windres.exe
+RES  = Aukwar_partie_private.res
+OBJ  = main_GTK.o nouvellePartie.o charger.o options.o fonctionsAutres.o credits.o editeur.o jeu.o ia.o $(RES)
+LINKOBJ  = main_GTK.o nouvellePartie.o charger.o options.o fonctionsAutres.o credits.o editeur.o jeu.o ia.o $(RES)
+LIBS =  -L"C:/Dev-Cpp/lib" -L"C:/Program Files/GTK+ 2.10.6/lib" -mwindows -lglib-2.0 -lpangocairo-1.0 -lpangowin32-1.0 -latk-1.0 -lgdk_pixbuf-2.0 -lgdk-win32-2.0 -lpango-1.0 -lgmodule-2.0 -lgobject-2.0 -lgthread-2.0 -lgtk-win32-2.0 -lcairo -lmingw32  -lSDLmain  -lSDL  -lSDL_ttf  -s 
+INCS =  -I"C:/Dev-Cpp/include" 
+CXXINCS =  -I"C:/Dev-Cpp/lib/gcc/mingw32/3.4.2/include"  -I"C:/Dev-Cpp/include/c++/3.4.2/backward"  -I"C:/Dev-Cpp/include/c++/3.4.2/mingw32"  -I"C:/Dev-Cpp/include/c++/3.4.2"  -I"C:/Dev-Cpp/include"  -I"C:/Program Files/GTK+ 2.10.6/include"  -I"C:/Program Files/GTK+ 2.10.6/include/atk-1.12.2"  -I"C:/Program Files/GTK+ 2.10.6/include/cairo-1.2.0"  -I"C:/Program Files/GTK+ 2.10.6/include/cairo-1.2.0/src"  -I"C:/Program Files/GTK+ 2.10.6/include/glib-2.12.4"  -I"C:/Program Files/GTK+ 2.10.6/include/glib-2.12.4/build"  -I"C:/Program Files/GTK+ 2.10.6/include/glib-2.12.4/glib"  -I"C:/Program Files/GTK+ 2.10.6/include/glib-2.12.4/gmodule"  -I"C:/Program Files/GTK+ 2.10.6/include/glib-2.12.4/gobject"  -I"C:/Program Files/GTK+ 2.10.6/include/glib-2.12.4/gthread"  -I"C:/Program Files/GTK+ 2.10.6/include/gtk+-2.10.6"  -I"C:/Program Files/GTK+ 2.10.6/include/gtk+-2.10.6/contrib"  -I"C:/Program Files/GTK+ 2.10.6/include/gtk+-2.10.6/gtk"  -I"C:/Program Files/GTK+ 2.10.6/include/gtk+-2.10.6/gtk"  -I"C:/Program Files/GTK+ 2.10.6/include/gtk+-2.10.6/gdk-pixbuf"  -I"C:/Program Files/GTK+ 2.10.6/include/gtk+-2.10.6/modules"  -I"C:/Program Files/GTK+ 2.10.6/include/libpng-1.2.8"  -I"C:/Program Files/GTK+ 2.10.6/include/libpng-1.2.8/contrib"  -I"C:/Program Files/GTK+ 2.10.6/include/pango-1.14.4"  -I"C:/Program Files/GTK+ 2.10.6/include/pango-1.14.4/modules"  -I"C:/Program Files/GTK+ 2.10.6/include/pango-1.14.4/pango"  -I"C:/Program Files/GTK+ 2.10.6/include/tiff-3.7.4"  -I"C:/Program Files/GTK+ 2.10.6/include/tiff-3.7.4/libtiff"  -I"C:/Program Files/GTK+ 2.10.6/lib/glib-2.12.3/include"  -I"C:/Program Files/GTK+ 2.10.6/lib/gtk+-2.10.3/include" 
+BIN  = "Aukwar partie.exe"
+CXXFLAGS = $(CXXINCS) -mms-bitfields  
+CFLAGS = $(INCS)  
+RM = rm -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before "Aukwar partie.exe" all-after
+
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o "Aukwar partie.exe" $(LIBS)
+
+main_GTK.o: main_GTK.cpp
+	$(CPP) -c main_GTK.cpp -o main_GTK.o $(CXXFLAGS)
+
+nouvellePartie.o: nouvellePartie.c
+	$(CPP) -c nouvellePartie.c -o nouvellePartie.o $(CXXFLAGS)
+
+charger.o: charger.c
+	$(CPP) -c charger.c -o charger.o $(CXXFLAGS)
+
+options.o: options.c
+	$(CPP) -c options.c -o options.o $(CXXFLAGS)
+
+fonctionsAutres.o: fonctionsAutres.c
+	$(CPP) -c fonctionsAutres.c -o fonctionsAutres.o $(CXXFLAGS)
+
+credits.o: credits.c
+	$(CPP) -c credits.c -o credits.o $(CXXFLAGS)
+
+editeur.o: editeur.c
+	$(CPP) -c editeur.c -o editeur.o $(CXXFLAGS)
+
+jeu.o: jeu.c
+	$(CPP) -c jeu.c -o jeu.o $(CXXFLAGS)
+
+ia.o: ia.c
+	$(CPP) -c ia.c -o ia.o $(CXXFLAGS)
+
+Aukwar_partie_private.res: Aukwar_partie_private.rc 
+	$(WINDRES) -i Aukwar_partie_private.rc --input-format=rc -o Aukwar_partie_private.res -O coff 

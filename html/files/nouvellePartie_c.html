@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>nouvellePartie_c.html</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="SynEdit HTML exporter" />
+<style type="text/css">
+<!--
+body { color: #000000; background-color: #FFFFFF; }
+.cpp1-assembler { color: #0000FF; }
+.cpp1-character { color: #000000; }
+.cpp1-comment { color: #316AC5; font-style: italic; }
+.cpp1-float { color: #800080; }
+.cpp1-hexadecimal { color: #800080; }
+.cpp1-identifier { color: #000000; }
+.cpp1-illegalchar { color: #000000; }
+.cpp1-number { color: #800080; }
+.cpp1-octal { color: #800080; }
+.cpp1-preprocessor { color: #008000; }
+.cpp1-reservedword { color: #000000; font-weight: bold; }
+.cpp1-space { background-color: #FFFFFF; color: #000000; }
+.cpp1-string { color: #FF0000; }
+.cpp1-symbol { color: #000000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<code><span style="font: 10pt Courier New;"><span class="cpp1-comment">/*
+  Nom:nouvellePartie.c 
+  Copyright: 
+  Auteur:cendre 
+  Date:05/04/07 19:01
+  Description:g&eacute;re la cr&eacute;ation d une nouvelle partie 
+*/
+
+</span><span class="cpp1-preprocessor">#include &quot;nouvellePartie.h&quot;
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Quitter_Principal(GtkWidget *widget, gpointer data)
+{
+GtkWidget *fenetre;
+fenetre=gtk_widget_get_toplevel(GTK_WIDGET(data));
+gtk_widget_destroy(fenetre); 
+SDL_Quit();
+exit(EXIT_SUCCESS);
+} 
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Quitter(GtkWidget *widget, gpointer data)
+{ 
+GtkWidget *fenetre;
+fenetre=gtk_widget_get_toplevel(GTK_WIDGET(data));
+gtk_widget_destroy(fenetre); 
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> nouvellePartie(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">)
+{
+GtkWidget *fenetre;
+GtkWidget *vBox;
+GtkWidget *label;
+
+GtkWidget *radioElfe;
+GtkWidget *radioNain;
+GtkWidget *radioHumain;
+
+GtkWidget *valider;
+
+
+fenetre = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+gtk_window_set_position(GTK_WINDOW(fenetre), GTK_WIN_POS_CENTER);
+gtk_window_set_default_size(GTK_WINDOW(fenetre), </span><span class="cpp1-number">320</span><span class="cpp1-symbol">, </span><span class="cpp1-number">200</span><span class="cpp1-symbol">);
+gtk_window_set_title(GTK_WINDOW(fenetre), </span><span class="cpp1-string">&quot;Choix de race&quot;</span><span class="cpp1-symbol">);
+
+vBox=gtk_vbox_new(TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+gtk_container_add(GTK_CONTAINER(fenetre),vBox);
+
+label=gtk_label_new(</span><span class="cpp1-string">&quot;Choix de la race:&quot;</span><span class="cpp1-symbol">);
+gtk_box_pack_start(GTK_BOX(vBox),label,FALSE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+radioElfe= gtk_radio_button_new_with_label(NULL, </span><span class="cpp1-string">&quot;Elfe&quot;</span><span class="cpp1-symbol">);
+gtk_box_pack_start(GTK_BOX(vBox),radioElfe,FALSE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+radioNain= gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(radioElfe), </span><span class="cpp1-string">&quot;Nain&quot;</span><span class="cpp1-symbol">);
+gtk_box_pack_start(GTK_BOX(vBox),radioNain,FALSE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+radioHumain= gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(radioElfe), </span><span class="cpp1-string">&quot;Humain&quot;</span><span class="cpp1-symbol">);
+gtk_box_pack_start(GTK_BOX(vBox),radioHumain,FALSE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+valider=gtk_button_new_from_stock(GTK_STOCK_OK);
+gtk_box_pack_start(GTK_BOX(vBox),valider,FALSE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+g_signal_connect(G_OBJECT(fenetre), </span><span class="cpp1-string">&quot;destroy&quot;</span><span class="cpp1-symbol">, G_CALLBACK(Quitter),fenetre);
+g_signal_connect(G_OBJECT(valider), </span><span class="cpp1-string">&quot;clicked&quot;</span><span class="cpp1-symbol">, G_CALLBACK(validerChoix),radioElfe);
+
+gtk_widget_show_all(fenetre);
+gtk_main();
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> validerChoix(GtkWidget *boutton, gpointer data)
+{
+    GtkWidget *info;
+    GtkWidget *fenetre;
+    GSList *liste;
+    </span><span class="cpp1-reservedword">static</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> gchar *label;
+
+    liste = gtk_radio_button_get_group(GTK_RADIO_BUTTON(data));
+
+    </span><span class="cpp1-reservedword">while</span><span class="cpp1-symbol">(liste!=NULL)
+    {
+        </span><span class="cpp1-comment">/* chercher le boutton qui est selection&eacute;*/
+</span><span class="cpp1-space">        </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(liste-&gt;data)))
+        {
+            </span><span class="cpp1-comment">//si c est celui la                                                            
+</span><span class="cpp1-space">            label = gtk_button_get_label(GTK_BUTTON(liste-&gt;data));
+            liste = NULL;
+        }
+        </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">        {   
+            </span><span class="cpp1-comment">//si c est pas celui la , on essaie le suivant
+</span><span class="cpp1-space">            liste= g_slist_next(liste);
+        }
+    }
+    
+    fenetre = gtk_widget_get_toplevel(GTK_WIDGET(data));
+
+    info = gtk_message_dialog_new (GTK_WINDOW(fenetre),GTK_DIALOG_MODAL,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,
+        </span><span class="cpp1-string">&quot;demarage d une nouvelle partie avec  %s&quot;</span><span class="cpp1-symbol">, label);
+    
+    FILE* fichier=NULL;
+    fichier=fopen(</span><span class="cpp1-string">&quot;temp.txt&quot;</span><span class="cpp1-symbol">,</span><span class="cpp1-string">&quot;a&quot;</span><span class="cpp1-symbol">);
+
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">((strcmp(label,</span><span class="cpp1-string">&quot;Facile&quot;</span><span class="cpp1-symbol">)==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)||(strcmp(label,</span><span class="cpp1-string">&quot;Moyen&quot;</span><span class="cpp1-symbol">)==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)||(strcmp(label,</span><span class="cpp1-string">&quot;Difficile&quot;</span><span class="cpp1-symbol">)==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">))
+    {
+    fprintf(fichier,</span><span class="cpp1-string">&quot;%s&quot;</span><span class="cpp1-symbol">,label);
+    fclose(fichier);
+    gtk_widget_destroy(info);
+    gtk_widget_destroy(fenetre); 
+    nomSauvegarde();</span><span class="cpp1-comment">//si on a choisi la difficulte , on passe au nom de la sauvegarde
+</span><span class="cpp1-space">    }
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">((strcmp(label,</span><span class="cpp1-string">&quot;Nain&quot;</span><span class="cpp1-symbol">)==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)||(strcmp(label,</span><span class="cpp1-string">&quot;Elfe&quot;</span><span class="cpp1-symbol">)==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)||(strcmp(label,</span><span class="cpp1-string">&quot;Humain&quot;</span><span class="cpp1-symbol">)==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">))
+    {
+    fprintf(fichier,</span><span class="cpp1-string">&quot;%s\n&quot;</span><span class="cpp1-symbol">,label);
+    fclose(fichier);
+    gtk_widget_destroy(info);
+    gtk_widget_destroy(fenetre); 
+    choixDifficulte();</span><span class="cpp1-comment">//si on a choisi la race , on passe au choix de la difficult&eacute;
+</span><span class="cpp1-space">    }
+    gtk_dialog_run(GTK_DIALOG(info));  
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> choixDifficulte(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">)
+{
+GtkWidget *fenetre;
+GtkWidget *vBox;
+GtkWidget *label;
+
+GtkWidget *radioFacile;
+GtkWidget *radioMoyen;
+GtkWidget *radioDifficile;
+
+GtkWidget *valider;
+
+gchar *convertUtf8;
+
+fenetre = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+gtk_window_set_position(GTK_WINDOW(fenetre), GTK_WIN_POS_CENTER);
+gtk_window_set_default_size(GTK_WINDOW(fenetre), </span><span class="cpp1-number">320</span><span class="cpp1-symbol">, </span><span class="cpp1-number">200</span><span class="cpp1-symbol">);
+gtk_window_set_title(GTK_WINDOW(fenetre), </span><span class="cpp1-string">&quot;Choix de  la difficulte&quot;</span><span class="cpp1-symbol">);
+
+vBox=gtk_vbox_new(TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+gtk_container_add(GTK_CONTAINER(fenetre),vBox);
+
+convertUtf8=g_locale_to_utf8(</span><span class="cpp1-string">&quot;Choix de la difficult&eacute;:&quot;</span><span class="cpp1-symbol">,-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,NULL,NULL,NULL);
+label=gtk_label_new(convertUtf8);
+gtk_box_pack_start(GTK_BOX(vBox),label,FALSE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+radioFacile= gtk_radio_button_new_with_label(NULL, </span><span class="cpp1-string">&quot;Facile&quot;</span><span class="cpp1-symbol">);
+gtk_box_pack_start(GTK_BOX(vBox),radioFacile,FALSE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+radioMoyen= gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(radioFacile), </span><span class="cpp1-string">&quot;Moyen&quot;</span><span class="cpp1-symbol">);
+gtk_box_pack_start(GTK_BOX(vBox),radioMoyen,FALSE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+radioDifficile= gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(radioFacile), </span><span class="cpp1-string">&quot;Difficile&quot;</span><span class="cpp1-symbol">);
+gtk_box_pack_start(GTK_BOX(vBox),radioDifficile,FALSE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+valider=gtk_button_new_from_stock(GTK_STOCK_OK);
+gtk_box_pack_start(GTK_BOX(vBox),valider,FALSE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+g_signal_connect(G_OBJECT(fenetre), </span><span class="cpp1-string">&quot;destroy&quot;</span><span class="cpp1-symbol">, G_CALLBACK(Quitter),fenetre);
+g_signal_connect(G_OBJECT(valider), </span><span class="cpp1-string">&quot;clicked&quot;</span><span class="cpp1-symbol">, G_CALLBACK(validerChoix),radioFacile);
+
+gtk_widget_show_all(fenetre);
+gtk_main();
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> nomSauvegarde(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">)
+{
+GtkWidget *fenetre;
+GtkWidget *texte;
+GtkWidget *vBox;
+GtkWidget *valider;
+GtkWidget *labelS;
+
+fenetre = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+gtk_window_set_position(GTK_WINDOW(fenetre), GTK_WIN_POS_CENTER);
+gtk_window_set_default_size(GTK_WINDOW(fenetre), </span><span class="cpp1-number">320</span><span class="cpp1-symbol">, </span><span class="cpp1-number">200</span><span class="cpp1-symbol">);
+gtk_window_set_title(GTK_WINDOW(fenetre), </span><span class="cpp1-string">&quot;Nom de la sauvegarde&quot;</span><span class="cpp1-symbol">);
+
+
+vBox=gtk_vbox_new(TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+gtk_container_add(GTK_CONTAINER(fenetre),vBox);
+
+labelS=gtk_label_new(</span><span class="cpp1-string">&quot;nom de la partie:&quot;</span><span class="cpp1-symbol">);
+gtk_box_pack_start(GTK_BOX(vBox),labelS,TRUE,TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+texte=gtk_entry_new();
+gtk_box_pack_start(GTK_BOX(vBox),texte,TRUE,TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+g_signal_connect(G_OBJECT(fenetre), </span><span class="cpp1-string">&quot;destroy&quot;</span><span class="cpp1-symbol">, G_CALLBACK(Quitter), NULL);
+
+valider=gtk_button_new_from_stock(GTK_STOCK_OK);
+gtk_box_pack_start(GTK_BOX(vBox),valider,FALSE,FALSE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+g_signal_connect(G_OBJECT(valider), </span><span class="cpp1-string">&quot;clicked&quot;</span><span class="cpp1-symbol">, G_CALLBACK(sauvegarderPartie),texte);
+g_signal_connect(G_OBJECT(texte  ), </span><span class="cpp1-string">&quot;activate&quot;</span><span class="cpp1-symbol">,G_CALLBACK(sauvegarderPartie),texte);
+
+
+
+gtk_widget_show_all(fenetre);
+gtk_main();
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> sauvegarderPartie(GtkWidget *label,gpointer data)
+{
+FILE*fichierRecup=NULL,*sauvegarde=NULL;
+FILE *fichier1=NULL,*fichier2=NULL;
+</span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> gchar* recup;</span><span class="cpp1-comment">//pour la zone de texte-&gt;nom de la sauvegarde
+</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> race[</span><span class="cpp1-number">20</span><span class="cpp1-symbol">];</span><span class="cpp1-comment">//pour le fichier temp-&gt;race
+</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> difficulte[</span><span class="cpp1-number">20</span><span class="cpp1-symbol">];</span><span class="cpp1-comment">//pour le fichier temp-&gt;difficulte
+</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> extension[</span><span class="cpp1-number">200</span><span class="cpp1-symbol">];</span><span class="cpp1-comment">//modif pour ajouter l extension
+</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> extension2[</span><span class="cpp1-number">200</span><span class="cpp1-symbol">];
+GtkWidget *fenetre;</span><span class="cpp1-comment">//fenetre pour la zone de texte
+</span><span class="cpp1-identifier">GtkWidget *info;</span><span class="cpp1-comment">//fenetre d info pour fichier d&eacute;j&agrave; existant
+</span><span class="cpp1-identifier">gchar *utf8;
+
+fenetre = gtk_widget_get_toplevel(GTK_WIDGET(data));
+
+recup=gtk_entry_get_text(GTK_ENTRY(data));
+
+
+
+fichierRecup=fopen(</span><span class="cpp1-string">&quot;temp.txt&quot;</span><span class="cpp1-symbol">,</span><span class="cpp1-string">&quot;r+&quot;</span><span class="cpp1-symbol">);
+</span><span class="cpp1-comment">//--------------------------
+//recup du fichier temporaire
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(fichierRecup!=NULL)
+{
+fscanf(fichierRecup,</span><span class="cpp1-string">&quot;%s\n%s&quot;</span><span class="cpp1-symbol">,&amp;difficulte,&amp;race);
+fclose(fichierRecup);
+remove(</span><span class="cpp1-string">&quot;temp.txt&quot;</span><span class="cpp1-symbol">);
+}
+</span><span class="cpp1-comment">//--------------------------
+</span><span class="cpp1-identifier">sprintf(extension,</span><span class="cpp1-string">&quot;data/parties/%s_.sav&quot;</span><span class="cpp1-symbol">,recup);</span><span class="cpp1-comment">//ajout de l extension + chemin
+</span><span class="cpp1-identifier">sprintf(extension2,</span><span class="cpp1-string">&quot;data/parties/%s.sav&quot;</span><span class="cpp1-symbol">,recup);
+</span><span class="cpp1-comment">//-----------------------------------------
+</span><span class="cpp1-identifier">sauvegarde=fopen(extension,</span><span class="cpp1-string">&quot;r&quot;</span><span class="cpp1-symbol">);
+
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(sauvegarde!=NULL)
+{
+ </span><span class="cpp1-comment">//test pour savoir si le fichier existe d&eacute;j&agrave;
+</span><span class="cpp1-space"> utf8=g_locale_to_utf8(</span><span class="cpp1-string">&quot;Une partie de ce nom existe d&eacute;j&agrave;.&quot;</span><span class="cpp1-symbol">,-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,NULL,NULL,NULL);
+ info = gtk_message_dialog_new (GTK_WINDOW(fenetre),
+        GTK_DIALOG_MODAL,
+        GTK_MESSAGE_INFO,
+        GTK_BUTTONS_OK,
+        utf8);
+
+fclose(sauvegarde);</span><span class="cpp1-comment">//on ferme l' essai
+</span><span class="cpp1-reservedword">switch</span><span class="cpp1-symbol">(gtk_dialog_run(GTK_DIALOG(info)))
+{
+</span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> GTK_RESPONSE_OK:
+Quitter(NULL,info);
+} 
+gtk_main();
+}    
+</span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(sauvegarde==NULL)                    
+{
+</span><span class="cpp1-comment">//-----------------------
+//ecriture accordee-&gt;le fichier n existe pas encore
+</span><span class="cpp1-identifier">sauvegarde=fopen(extension,</span><span class="cpp1-string">&quot;w&quot;</span><span class="cpp1-symbol">);
+
+fprintf(sauvegarde,</span><span class="cpp1-string">&quot;[FICHIER DE SAUVEGARDE]\ndifficulte=%s\nrace=%s\nnbMaison=0\nnbUnite=5\nnbFerme=1\n&quot;</span><span class="cpp1-symbol">,race,difficulte);
+
+fclose(sauvegarde);
+
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">((fichier1=fopen(extension,</span><span class="cpp1-string">&quot;rb&quot;</span><span class="cpp1-symbol">))==NULL)
+exit(</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+fichier2=fopen(extension2,</span><span class="cpp1-string">&quot;wb&quot;</span><span class="cpp1-symbol">);
+xoring(fichier1,fichier2,</span><span class="cpp1-string">&quot;cle_Aukwar&quot;</span><span class="cpp1-symbol">);
+fclose(fichier1);
+fclose(fichier2);
+remove(extension);
+
+remove(</span><span class="cpp1-string">&quot;temp.txt&quot;</span><span class="cpp1-symbol">);
+Quitter(NULL,(gpointer*)fenetre);
+jeu(extension);
+}
+
+}
+
+</span></span>
+</code></pre>
+</body>
+</html>

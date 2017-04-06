@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>options_c.html</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="SynEdit HTML exporter" />
+<style type="text/css">
+<!--
+body { color: #000000; background-color: #FFFFFF; }
+.cpp1-assembler { color: #0000FF; }
+.cpp1-character { color: #000000; }
+.cpp1-comment { color: #316AC5; font-style: italic; }
+.cpp1-float { color: #800080; }
+.cpp1-hexadecimal { color: #800080; }
+.cpp1-identifier { color: #000000; }
+.cpp1-illegalchar { color: #000000; }
+.cpp1-number { color: #800080; }
+.cpp1-octal { color: #800080; }
+.cpp1-preprocessor { color: #008000; }
+.cpp1-reservedword { color: #000000; font-weight: bold; }
+.cpp1-space { background-color: #FFFFFF; color: #000000; }
+.cpp1-string { color: #FF0000; }
+.cpp1-symbol { color: #000000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<code><span style="font: 10pt Courier New;"><span class="cpp1-comment">/*
+  Name: 
+  Copyright: 
+  Author: 
+  Date: 25/03/07 14:35
+  Description: 
+*/
+
+</span><span class="cpp1-preprocessor">#include &quot;options.h&quot;
+
+
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> options(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">)
+{
+GtkWidget *fenetre;
+GtkWidget *vBox;
+GtkWidget *vBoxFrame;
+GtkWidget *vBoxFrame2;
+GtkWidget *separateur;
+GtkWidget *barreMusique;
+GtkWidget *barreBruitage;
+GtkWidget *labelMusique;
+GtkWidget *labelBruitage;
+GtkWidget *valider;
+GtkWidget *frameMusique;
+GtkWidget *frameBruitage;
+GtkObject *ajustMusique;
+GtkObject *ajustBruitage;
+gdouble valeurDepartMusique=</span><span class="cpp1-number">50</span><span class="cpp1-symbol">;
+gdouble valeurDepartBruitage=</span><span class="cpp1-number">35</span><span class="cpp1-symbol">;
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> volMusique=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> volBruitage=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+gchar valBruitage[</span><span class="cpp1-number">20</span><span class="cpp1-symbol">];
+gchar valMusique[</span><span class="cpp1-number">20</span><span class="cpp1-symbol">];
+
+chargerOptions(&amp;volMusique,&amp;volBruitage);
+sprintf(valMusique,</span><span class="cpp1-string">&quot;%ld&quot;</span><span class="cpp1-symbol">,volMusique);
+sprintf(valBruitage,</span><span class="cpp1-string">&quot;%ld&quot;</span><span class="cpp1-symbol">,volBruitage);
+</span><span class="cpp1-comment">//creation de la fenetre
+</span><span class="cpp1-identifier">fenetre=gtk_window_new(GTK_WINDOW_TOPLEVEL);
+gtk_window_set_position(GTK_WINDOW(fenetre), GTK_WIN_POS_CENTER);
+gtk_window_set_default_size(GTK_WINDOW(fenetre), </span><span class="cpp1-number">320</span><span class="cpp1-symbol">, </span><span class="cpp1-number">200</span><span class="cpp1-symbol">);
+gtk_window_set_title(GTK_WINDOW(fenetre), </span><span class="cpp1-string">&quot;Choix des Options&quot;</span><span class="cpp1-symbol">);
+
+vBox=gtk_vbox_new(TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+gtk_container_add(GTK_CONTAINER(fenetre),vBox);
+
+frameMusique=gtk_frame_new(</span><span class="cpp1-string">&quot;Volume de la musique&quot;</span><span class="cpp1-symbol">);
+gtk_frame_set_shadow_type(GTK_FRAME(frameMusique),GTK_SHADOW_ETCHED_IN);
+
+frameBruitage=gtk_frame_new(</span><span class="cpp1-string">&quot;Volume des bruitages&quot;</span><span class="cpp1-symbol">);
+gtk_frame_set_shadow_type(GTK_FRAME(frameBruitage),GTK_SHADOW_ETCHED_IN);
+
+vBoxFrame=gtk_vbox_new(TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+gtk_container_add(GTK_CONTAINER(frameMusique),vBoxFrame);
+
+vBoxFrame2=gtk_vbox_new(TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+gtk_container_add(GTK_CONTAINER(frameBruitage),vBoxFrame2);
+
+
+</span><span class="cpp1-comment">//-------------------------
+//creation de la barre musique avec le label
+
+</span><span class="cpp1-identifier">gtk_box_pack_start(GTK_BOX(vBox),frameMusique, TRUE, FALSE, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+labelMusique =gtk_label_new(valMusique);
+ajustMusique=gtk_adjustment_new(volMusique,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">100</span><span class="cpp1-symbol">,</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,</span><span class="cpp1-number">10</span><span class="cpp1-symbol">,</span><span class="cpp1-number">1</span><span class="cpp1-symbol">);
+gtk_box_pack_start(GTK_BOX(vBoxFrame),labelMusique, FALSE, FALSE, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+barreMusique=gtk_hscrollbar_new(GTK_ADJUSTMENT(ajustMusique));
+gtk_box_pack_start(GTK_BOX(vBoxFrame),barreMusique, TRUE, FALSE, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+g_signal_connect(G_OBJECT(barreMusique), </span><span class="cpp1-string">&quot;value-changed&quot;</span><span class="cpp1-symbol">,G_CALLBACK(barreChange), (GtkWidget*)labelMusique);
+
+</span><span class="cpp1-comment">//-------------------------
+//creation de la barre bruitage avec le label
+
+</span><span class="cpp1-identifier">gtk_box_pack_start(GTK_BOX(vBox),frameBruitage, TRUE, TRUE, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+labelBruitage=gtk_label_new(valBruitage);
+ajustBruitage=gtk_adjustment_new(volBruitage,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,</span><span class="cpp1-number">100</span><span class="cpp1-symbol">,</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,</span><span class="cpp1-number">10</span><span class="cpp1-symbol">,</span><span class="cpp1-number">1</span><span class="cpp1-symbol">);
+gtk_box_pack_start(GTK_BOX(vBoxFrame2),labelBruitage, FALSE, FALSE, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+barreBruitage=gtk_hscrollbar_new(GTK_ADJUSTMENT(ajustBruitage));
+gtk_box_pack_start(GTK_BOX(vBoxFrame2),barreBruitage, TRUE, TRUE, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+g_signal_connect(G_OBJECT(barreBruitage), </span><span class="cpp1-string">&quot;value-changed&quot;</span><span class="cpp1-symbol">,G_CALLBACK(barreChange), (GtkWidget*)labelBruitage);
+</span><span class="cpp1-comment">//------------------------
+
+</span><span class="cpp1-identifier">valider=gtk_button_new_from_stock(GTK_STOCK_OK);
+gtk_box_pack_start(GTK_BOX(vBox),valider, TRUE,FALSE, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+
+g_signal_connect(G_OBJECT(valider), </span><span class="cpp1-string">&quot;clicked&quot;</span><span class="cpp1-symbol">, G_CALLBACK(enregistrerMusique),labelMusique);
+g_signal_connect(G_OBJECT(valider), </span><span class="cpp1-string">&quot;clicked&quot;</span><span class="cpp1-symbol">, G_CALLBACK(enregistrerBruitage),labelBruitage);
+g_signal_connect(G_OBJECT(fenetre), </span><span class="cpp1-string">&quot;destroy&quot;</span><span class="cpp1-symbol">, G_CALLBACK(destroy), fenetre);
+
+gtk_widget_show_all(fenetre);
+gtk_main();
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> barreChange(GtkWidget *widget, gpointer data)
+{
+  gchar* recup;
+  gint valeur;
+  valeur = gtk_range_get_value(GTK_RANGE(widget));
+  recup = g_strdup_printf(</span><span class="cpp1-string">&quot;%ld&quot;</span><span class="cpp1-symbol">,valeur);
+  gtk_label_set_text(GTK_LABEL(data), recup);
+  g_free(recup);
+}
+
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> destroy(GtkWidget *widget, gpointer data)
+{
+GtkWidget *fenetre;
+fenetre = gtk_widget_get_toplevel(GTK_WIDGET(data));
+gtk_widget_destroy(fenetre);
+}
+
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> enregistrerMusique(GtkWidget *widget, gpointer data)
+{
+
+GtkWidget *fenetre;
+</span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> gchar *label;
+FILE *fichier=NULL,*fichier1=NULL,*fichier2=NULL;
+fenetre = gtk_widget_get_toplevel(GTK_WIDGET(data));
+label=gtk_label_get_label(GTK_LABEL(data));
+
+
+fichier=fopen(</span><span class="cpp1-string">&quot;data/options_.opt&quot;</span><span class="cpp1-symbol">,</span><span class="cpp1-string">&quot;w&quot;</span><span class="cpp1-symbol">);
+fprintf(fichier,</span><span class="cpp1-string">&quot;[FICHIER D OPTION]\nvolumeMusique=%s\n&quot;</span><span class="cpp1-symbol">,label);
+fclose(fichier);
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">((fichier1=fopen(</span><span class="cpp1-string">&quot;data/options_.opt&quot;</span><span class="cpp1-symbol">,</span><span class="cpp1-string">&quot;rb&quot;</span><span class="cpp1-symbol">))==NULL)
+exit(</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+fichier2=fopen(</span><span class="cpp1-string">&quot;data/options.opt&quot;</span><span class="cpp1-symbol">,</span><span class="cpp1-string">&quot;wb&quot;</span><span class="cpp1-symbol">);
+xoring(fichier1,fichier2,</span><span class="cpp1-string">&quot;cle_Aukwar&quot;</span><span class="cpp1-symbol">);
+fclose(fichier1);
+fclose(fichier2);
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> enregistrerBruitage(GtkWidget *widget, gpointer data)
+{
+
+GtkWidget *fenetre;
+</span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> gchar *label;
+FILE *fichier=NULL,*fichier1=NULL,*fichier2=NULL;
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> valeur=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+fenetre = gtk_widget_get_toplevel(GTK_WIDGET(data));
+label=gtk_label_get_label(GTK_LABEL(data));
+
+
+fichier=fopen(</span><span class="cpp1-string">&quot;data/options_.opt&quot;</span><span class="cpp1-symbol">,</span><span class="cpp1-string">&quot;a&quot;</span><span class="cpp1-symbol">);
+fprintf(fichier,</span><span class="cpp1-string">&quot;volumeBruitage=%s&quot;</span><span class="cpp1-symbol">,label);
+fclose(fichier);
+
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">((fichier1=fopen(</span><span class="cpp1-string">&quot;data/options_.opt&quot;</span><span class="cpp1-symbol">,</span><span class="cpp1-string">&quot;rb&quot;</span><span class="cpp1-symbol">))==NULL)
+exit(</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+fichier2=fopen(</span><span class="cpp1-string">&quot;data/options.opt&quot;</span><span class="cpp1-symbol">,</span><span class="cpp1-string">&quot;wb&quot;</span><span class="cpp1-symbol">);
+xoring(fichier1,fichier2,</span><span class="cpp1-string">&quot;cle_Aukwar&quot;</span><span class="cpp1-symbol">);
+fclose(fichier1);
+fclose(fichier2);
+remove(</span><span class="cpp1-string">&quot;data/options_.opt&quot;</span><span class="cpp1-symbol">);
+gtk_widget_destroy(fenetre);
+}
+</span></span>
+</code></pre>
+</body>
+</html>

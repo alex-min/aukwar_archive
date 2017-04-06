@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>ia_c.html</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="SynEdit HTML exporter" />
+<style type="text/css">
+<!--
+body { color: #000000; background-color: #FFFFFF; }
+.cpp1-assembler { color: #0000FF; }
+.cpp1-character { color: #000000; }
+.cpp1-comment { color: #316AC5; font-style: italic; }
+.cpp1-float { color: #800080; }
+.cpp1-hexadecimal { color: #800080; }
+.cpp1-identifier { color: #000000; }
+.cpp1-illegalchar { color: #000000; }
+.cpp1-number { color: #800080; }
+.cpp1-octal { color: #800080; }
+.cpp1-preprocessor { color: #008000; }
+.cpp1-reservedword { color: #000000; font-weight: bold; }
+.cpp1-space { background-color: #FFFFFF; color: #000000; }
+.cpp1-string { color: #FF0000; }
+.cpp1-symbol { color: #000000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<code><span style="font: 10pt Courier New;"><span class="cpp1-preprocessor">#include &quot;ia.h&quot;
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> construireNouvelleUnite(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nature,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> x,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> y,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> posBatiment[][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">])
+{
+</span><span class="cpp1-reservedword">switch</span><span class="cpp1-symbol">(nature)
+ {
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FERME_ALLIE:
+ posBatiment[x][y]=FERME_ALLIE;
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">; 
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FERME_OPPOSANT:
+ posBatiment[x][y]=FERME_OPPOSANT;
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> BARRIERE:
+ posBatiment[x][y]=BARRIERE;
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SOLDAT_ALLIE:
+ posBatiment[x][y]=SOLDAT_ALLIE;
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SOLDAT_ENNEMI:
+ posBatiment[x][y]=SOLDAT_ENNEMI;
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ }
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> bougerSoldat(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> x_pre,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> y_pre,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> x,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> y,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> posBatiment[][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">])
+{
+</span><span class="cpp1-reservedword">switch</span><span class="cpp1-symbol">(posBatiment[x_pre][y_pre])
+ {
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SOLDAT_ALLIE:
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posBatiment[x][y]!=FERME_ALLIE &amp;&amp; posBatiment[x][y]!=FERME_OPPOSANT &amp;&amp; posBatiment[x][y]!=BARRIERE &amp;&amp; posBatiment[x][y]!=SOLDAT_ALLIE &amp;&amp; posBatiment[x][y]!=SOLDAT_ENNEMI)
+ {
+ posBatiment[x_pre][y_pre]=VIDE;
+ posBatiment[x][y]=SOLDAT_ALLIE;
+ }
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SOLDAT_ENNEMI:
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posBatiment[x][y]!=FERME_ALLIE &amp;&amp; posBatiment[x][y]!=FERME_OPPOSANT &amp;&amp; posBatiment[x][y]!=BARRIERE &amp;&amp; posBatiment[x][y]!=SOLDAT_ALLIE &amp;&amp; posBatiment[x][y]!=SOLDAT_ENNEMI)
+ {
+ posBatiment[x_pre][y_pre]=VIDE;
+ posBatiment[x][y]=SOLDAT_ENNEMI;
+ }
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">default</span><span class="cpp1-symbol">:
+ </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+ }
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> initJoueur(Joueur *joueur)
+{
+joueur-&gt;nbOr=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+joueur-&gt;nbBois=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+joueur-&gt;nbFer=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+joueur-&gt;nbPtsVictoire=</span><span class="cpp1-number">100</span><span class="cpp1-symbol">;
+joueur-&gt;nbNourriture=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+joueur-&gt;nbPopulation=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+joueur-&gt;nbSoldat=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+joueur-&gt;nbFerme=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+joueur-&gt;nom=</span><span class="cpp1-string">&quot;joueur&quot;</span><span class="cpp1-symbol">;
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> setOr(Joueur *joueur,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nbOr)
+{
+joueur-&gt;nbOr=nbOr;
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> setFer(Joueur *joueur,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nbFer)
+{
+joueur-&gt;nbFer=nbFer;
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> setPtsVictoire(Joueur *joueur,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nbPtsVictoire)
+{
+joueur-&gt;nbPtsVictoire=nbPtsVictoire;
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> setBois(Joueur *joueur,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nbBois)
+{
+joueur-&gt;nbBois=nbBois;
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> setPopulation(Joueur *joueur,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nbPopulation)
+{
+joueur-&gt;nbPopulation=nbPopulation;
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> setNourriture(Joueur *joueur,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nbNourriture)
+{
+joueur-&gt;nbNourriture=nbNourriture;
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> setSoldat(Joueur *joueur,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nbSoldat)
+{
+joueur-&gt;nbSoldat=nbSoldat;
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> setFerme(Joueur *joueur,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nbFerme)
+{ 
+joueur-&gt;nbFerme=nbFerme;
+}
+
+
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> actionia(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> posMatiere[][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">],</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> posBatiment[][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">],Joueur *ia)
+{
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+SDL_Rect posFerme[</span><span class="cpp1-number">200</span><span class="cpp1-symbol">],posSoldat[</span><span class="cpp1-number">200</span><span class="cpp1-symbol">],arrivee0,arrivee1,arrivee2;
+arrivee0.x=</span><span class="cpp1-number">50</span><span class="cpp1-symbol">;
+arrivee0.y=</span><span class="cpp1-number">10</span><span class="cpp1-symbol">;
+arrivee1.x=</span><span class="cpp1-number">30</span><span class="cpp1-symbol">;
+arrivee2.y=</span><span class="cpp1-number">30</span><span class="cpp1-symbol">;
+arrivee2.x=</span><span class="cpp1-number">15</span><span class="cpp1-symbol">;
+arrivee2.y=</span><span class="cpp1-number">15</span><span class="cpp1-symbol">;
+</span><span class="cpp1-comment">//si y a plus rien...
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(</span><span class="cpp1-number">0</span><span class="cpp1-comment">/*ia-&gt;nbPtsVictoire==0 || (ia-&gt;nbSoldat==0 &amp;&amp; ia-&gt;nbFerme==0)*/</span><span class="cpp1-symbol">)
+ { 
+ fprintf(stdout,</span><span class="cpp1-string">&quot;GAGNE!!\n&quot;</span><span class="cpp1-symbol">);
+ }
+</span><span class="cpp1-comment">//si y a encore de l'ia
+</span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space"> {
+ setSoldat(ia,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+ setFerme(ia,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);     
+ </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;</span><span class="cpp1-number">500</span><span class="cpp1-symbol">;i++)
+  {
+  </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;j&lt;</span><span class="cpp1-number">500</span><span class="cpp1-symbol">;j++)
+   {
+  </span><span class="cpp1-reservedword">switch</span><span class="cpp1-symbol">(posBatiment[i][j])
+     {
+     </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SOLDAT_ENNEMI:
+     posSoldat[ia-&gt;nbSoldat].x=i;
+     posSoldat[ia-&gt;nbSoldat].y=j;
+     ia-&gt;nbSoldat+=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+     </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+     </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FERME_OPPOSANT:
+     posFerme[ia-&gt;nbFerme].x=i;
+     posFerme[ia-&gt;nbFerme].y=j;
+     ia-&gt;nbFerme+=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+     </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+     }
+   }
+  }</span><span class="cpp1-comment">//FIN FOR
+</span><span class="cpp1-space">  
+  
+  deplacerIA(posSoldat[</span><span class="cpp1-number">0</span><span class="cpp1-symbol">],arrivee0,posBatiment,posMatiere);
+  
+  
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(ia-&gt;nbFerme/</span><span class="cpp1-number">3</span><span class="cpp1-space"> &gt; ia-&gt;nbSoldat)
+   {
+   </span><span class="cpp1-comment">//construireSoldat(ia,posMatiere,posBatiment);
+</span><span class="cpp1-space">   }
+   </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(ia-&gt;nbFerme/</span><span class="cpp1-number">3</span><span class="cpp1-space"> &lt; ia-&gt;nbSoldat)
+   {
+   </span><span class="cpp1-comment">//attaquer(ia,posMatiere,posBatiment);
+</span><span class="cpp1-space">   </span><span class="cpp1-comment">//construreFerme(ia,posMatiere,posBatiment);
+</span><span class="cpp1-space">   }
+   </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(ia-&gt;nbFerme/</span><span class="cpp1-number">3</span><span class="cpp1-space"> == ia-&gt;nbSoldat)
+   {
+   </span><span class="cpp1-comment">//soldats...
+</span><span class="cpp1-space">   }
+ }
+}
+
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> aucun(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nature,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> posMatiere[][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">],</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> posBatiment[][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">])
+{
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> aucun=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+</span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;</span><span class="cpp1-number">500</span><span class="cpp1-symbol">;i++)
+ {
+  </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;j&lt;</span><span class="cpp1-number">500</span><span class="cpp1-symbol">;j++)
+  {
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posMatiere[i][j]==nature || posBatiment[i][j]==nature)
+   {
+   aucun=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+   }
+  }
+ }
+</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> aucun;
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> attaquer(Joueur *ia,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> posMatiere[][</span><span class="cpp1-number">101</span><span class="cpp1-symbol">],</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> posBatiment[][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">])
+{
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nbAEnvoyer=ia-&gt;nbSoldat/</span><span class="cpp1-number">3</span><span class="cpp1-symbol">;
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+SDL_Rect posSoldat[</span><span class="cpp1-number">200</span><span class="cpp1-symbol">];
+SDL_Rect posFerme[</span><span class="cpp1-number">200</span><span class="cpp1-symbol">];
+SDL_Rect posFermeAllie;
+</span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;</span><span class="cpp1-number">500</span><span class="cpp1-symbol">;i++)
+ {
+  </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;j&lt;</span><span class="cpp1-number">500</span><span class="cpp1-symbol">;j++)
+   {
+   </span><span class="cpp1-reservedword">switch</span><span class="cpp1-symbol">(posBatiment[i][j])
+     {
+     </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> SOLDAT_ENNEMI:
+     posSoldat[ia-&gt;nbSoldat].x=i;
+     posSoldat[ia-&gt;nbSoldat].y=j;
+     </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+     </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FERME_OPPOSANT:
+     posFerme[ia-&gt;nbFerme].x=i;
+     posFerme[ia-&gt;nbFerme].y=j;
+     </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+     </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FERME_ALLIE:
+     posFermeAllie.x=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+     posFermeAllie.y=j;
+     </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+     }
+   }
+  </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i&lt;nbAEnvoyer;i++)
+   {
+   </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posFermeAllie.x&gt;posSoldat[i].x)
+    {
+    }
+   }
+ }
+}
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> deplacerIA(SDL_Rect caseDepart,SDL_Rect caseArrivee,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> posBatiment[][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">],</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> posMatiere[][</span><span class="cpp1-number">500</span><span class="cpp1-symbol">])
+{
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> horizontal=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,vertical=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,i=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,j=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> decalageDroite=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,decalageHaut=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,decalageBas=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,decalageGauche=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posBatiment[caseDepart.x][caseDepart.y]!=SOLDAT_ENNEMI ||posMatiere[caseArrivee.x][caseArrivee.y]==EAU ){}
+</span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space"> {
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(caseDepart.x&gt;caseArrivee.x)
+   {
+   </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posMatiere[caseDepart.x-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][caseDepart.y]!=EAU &amp;&amp; posBatiment[caseDepart.x-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][caseDepart.y]!=BARRIERE &amp;&amp; posBatiment[caseDepart.x-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][caseDepart.y]!=FERME_ALLIE &amp;&amp; posBatiment[caseDepart.x-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][caseDepart.y]!=FERME_OPPOSANT &amp;&amp; posBatiment[caseDepart.x-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][caseDepart.y]!=SOLDAT_ALLIE &amp;&amp; posBatiment[caseDepart.x-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][caseDepart.y]!=SOLDAT_ENNEMI)
+     {
+   posBatiment[caseDepart.x-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][caseDepart.y]=SOLDAT_ENNEMI;
+   posBatiment[caseDepart.x][caseDepart.y]=VIDE;
+     }
+   </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">    {
+    vertical=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+    }
+   }
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(caseDepart.x&lt;caseArrivee.x)
+   {
+   </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posMatiere[caseDepart.x+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][caseDepart.y]!=EAU &amp;&amp; posBatiment[caseDepart.x+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][caseDepart.y]!=BARRIERE &amp;&amp; posBatiment[caseDepart.x+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][caseDepart.y]!=FERME_ALLIE &amp;&amp; posBatiment[caseDepart.x+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][caseDepart.y]!=FERME_OPPOSANT &amp;&amp; posBatiment[caseDepart.x+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][caseDepart.y]!=SOLDAT_ALLIE &amp;&amp; posBatiment[caseDepart.x+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][caseDepart.y]!=SOLDAT_ENNEMI)
+     {
+   posBatiment[caseDepart.x+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][caseDepart.y]=SOLDAT_ENNEMI;
+   posBatiment[caseDepart.x][caseDepart.y]=VIDE;
+     }
+   </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">    {
+    vertical=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+    }
+   } 
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(caseDepart.y&gt;caseArrivee.y)
+   {
+   </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posMatiere[caseDepart.x][caseDepart.y-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">]!=EAU &amp;&amp; posBatiment[caseDepart.x][caseDepart.y+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">]!=BARRIERE &amp;&amp; posBatiment[caseDepart.x][caseDepart.y+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">]!=FERME_ALLIE &amp;&amp; posBatiment[caseDepart.x][caseDepart.y+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">]!=FERME_OPPOSANT &amp;&amp; posBatiment[caseDepart.x][caseDepart.y+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">]!=SOLDAT_ALLIE &amp;&amp; posBatiment[caseDepart.x][caseDepart.y+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">]!=SOLDAT_ENNEMI)
+     {
+   posBatiment[caseDepart.x][caseDepart.y-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">]=SOLDAT_ENNEMI;
+   posBatiment[caseDepart.x][caseDepart.y]=VIDE;
+     }
+   </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">     {
+     horizontal=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+     }
+   } 
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(caseDepart.y&lt;caseArrivee.y)
+   {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posMatiere[caseDepart.x][caseDepart.y+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">]!=EAU &amp;&amp; posBatiment[caseDepart.x][caseDepart.y-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">]!=BARRIERE &amp;&amp; posBatiment[caseDepart.x][caseDepart.y-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">]!=FERME_ALLIE &amp;&amp; posBatiment[caseDepart.x][caseDepart.y-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">]!=FERME_OPPOSANT &amp;&amp; posBatiment[caseDepart.x][caseDepart.y-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">]!=SOLDAT_ALLIE &amp;&amp; posBatiment[caseDepart.x][caseDepart.y-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">]!=SOLDAT_ENNEMI)
+     {
+   posBatiment[caseDepart.x][caseDepart.y+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">]=SOLDAT_ENNEMI;
+   posBatiment[caseDepart.x][caseDepart.y]=VIDE;
+     }
+   </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">    {
+    horizontal=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+    }
+   } 
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(horizontal)
+   {
+   </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;i&lt;=NB_BLOCS_X - caseDepart.x;i++)
+    {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posBatiment[caseDepart.x +i][caseDepart.y]!=VIDE || posMatiere[caseDepart.x +i][caseDepart.y]==EAU)
+     {
+     decalageDroite=i;
+     i=NB_BLOCS_X - caseDepart.x +</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+     }
+    }
+     </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=caseDepart.x-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;i&gt;=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i--)
+     {
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posBatiment[caseDepart.x-i][caseDepart.y]!=VIDE || posMatiere[caseDepart.x -i][caseDepart.y]==EAU)
+      {
+      decalageGauche=i;
+      
+      }
+     }
+     </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(decalageGauche &gt; decalageDroite)
+     {
+      posBatiment[caseDepart.x-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][caseDepart.y]=SOLDAT_ENNEMI;
+      posBatiment[caseDepart.x][caseDepart.y]=VIDE;
+     }
+     </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(decalageGauche &lt;= decalageDroite)
+     {
+      posBatiment[caseDepart.x+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">][caseDepart.y]=SOLDAT_ENNEMI;
+      posBatiment[caseDepart.x][caseDepart.y]=VIDE;
+     } 
+    
+   }
+   </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(vertical)
+   {
+   </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;i&lt;=NB_BLOCS_Y - caseDepart.y;i++)
+    {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posBatiment[caseDepart.x ][caseDepart.y+i]!=VIDE || posMatiere[caseDepart.x ][caseDepart.y+i]==EAU)
+     {
+     decalageBas=i;
+     i=NB_BLOCS_X -  caseDepart.y +</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+     }
+    }
+     </span><span class="cpp1-reservedword">for</span><span class="cpp1-symbol">(i=caseDepart.y-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;i&gt;=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;i--)
+     {
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(posBatiment[caseDepart.x][caseDepart.y-i]!=VIDE || posMatiere[caseDepart.x -i][caseDepart.y]==EAU)
+      {
+      decalageHaut=i;
+      }
+     } 
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(decalageHaut&gt; decalageBas)
+     {
+      posBatiment[caseDepart.x][caseDepart.y-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">]=SOLDAT_ENNEMI;
+      posBatiment[caseDepart.x][caseDepart.y]=VIDE;
+     }
+     </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(decalageHaut &lt; decalageBas)
+     {
+      posBatiment[caseDepart.x][caseDepart.y+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">]=SOLDAT_ENNEMI;
+      posBatiment[caseDepart.x][caseDepart.y]=VIDE;
+     }  
+  
+  }
+   
+ }
+}
+</span></span>
+</code></pre>
+</body>
+</html>

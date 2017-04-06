@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>main_GTK_cpp.html</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="SynEdit HTML exporter" />
+<style type="text/css">
+<!--
+body { color: #000000; background-color: #FFFFFF; }
+.cpp1-assembler { color: #0000FF; }
+.cpp1-character { color: #000000; }
+.cpp1-comment { color: #316AC5; font-style: italic; }
+.cpp1-float { color: #800080; }
+.cpp1-hexadecimal { color: #800080; }
+.cpp1-identifier { color: #000000; }
+.cpp1-illegalchar { color: #000000; }
+.cpp1-number { color: #800080; }
+.cpp1-octal { color: #800080; }
+.cpp1-preprocessor { color: #008000; }
+.cpp1-reservedword { color: #000000; font-weight: bold; }
+.cpp1-space { background-color: #FFFFFF; color: #000000; }
+.cpp1-string { color: #FF0000; }
+.cpp1-symbol { color: #000000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<code><span style="font: 10pt Courier New;"><span class="cpp1-comment">/*
+  Nom: 
+  Copyright: 
+  Auteur: 
+  Date: 01/04/07 13:56
+  Description: 
+*/
+</span><span class="cpp1-preprocessor">#include &lt;stdlib.h&gt;
+#include &lt;gtk/gtk.h&gt;
+#include &quot;nouvellePartie.h&quot;
+#include &quot;charger.h&quot;
+#include &quot;options.h&quot;
+#include &quot;credits.h&quot;
+#include &quot;editeur.h&quot;
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> main(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> argc,</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> **argv)
+{
+    
+    GtkWidget *fenetre;
+    GtkWidget *vBox;
+    GtkWidget *bouttonNouveau;
+    GtkWidget *bouttonCharger;
+    GtkWidget *bouttonEditeur;
+    GtkWidget *bouttonOptions;
+    GtkWidget *bouttonCredit;
+    GtkWidget *bouttonQuitter;
+
+    
+    gtk_init(&amp;argc,&amp;argv);
+
+    fenetre = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_position(GTK_WINDOW(fenetre), GTK_WIN_POS_CENTER);
+    gtk_window_set_default_size(GTK_WINDOW(fenetre), </span><span class="cpp1-number">320</span><span class="cpp1-symbol">, </span><span class="cpp1-number">200</span><span class="cpp1-symbol">);
+    gtk_window_set_title(GTK_WINDOW(fenetre), </span><span class="cpp1-string">&quot;Aukwar&quot;</span><span class="cpp1-symbol">);
+
+   vBox=gtk_vbox_new(TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+   gtk_container_add(GTK_CONTAINER(fenetre),vBox);
+   
+   bouttonNouveau=gtk_button_new_with_mnemonic(</span><span class="cpp1-string">&quot;_Nouvelle Partie&quot;</span><span class="cpp1-symbol">);
+   gtk_box_pack_start(GTK_BOX(vBox),bouttonNouveau,TRUE,TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+  
+   bouttonCharger=gtk_button_new_with_mnemonic(</span><span class="cpp1-string">&quot;_Charger Partie&quot;</span><span class="cpp1-symbol">);
+   gtk_box_pack_start(GTK_BOX(vBox), bouttonCharger,TRUE,TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+   
+   bouttonEditeur=gtk_button_new_with_mnemonic(</span><span class="cpp1-string">&quot;_Editeur De Niveaux&quot;</span><span class="cpp1-symbol">);
+   gtk_box_pack_start(GTK_BOX(vBox),bouttonEditeur,TRUE,TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+   
+   bouttonOptions=gtk_button_new_with_mnemonic(</span><span class="cpp1-string">&quot;_Options&quot;</span><span class="cpp1-symbol">);
+   gtk_box_pack_start(GTK_BOX(vBox),bouttonOptions,TRUE,TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+  
+   bouttonCredit=gtk_button_new_with_mnemonic(</span><span class="cpp1-string">&quot;_Credits&quot;</span><span class="cpp1-symbol">);
+   gtk_box_pack_start(GTK_BOX(vBox),bouttonCredit,TRUE,TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+  
+   bouttonQuitter=gtk_button_new_with_mnemonic(</span><span class="cpp1-string">&quot;_Quitter&quot;</span><span class="cpp1-symbol">);
+   gtk_box_pack_start(GTK_BOX(vBox),bouttonQuitter,TRUE,TRUE,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+    
+    g_signal_connect(G_OBJECT(fenetre), </span><span class="cpp1-string">&quot;destroy&quot;</span><span class="cpp1-symbol">, G_CALLBACK(Quitter_Principal), NULL);
+     
+    g_signal_connect(G_OBJECT(bouttonNouveau), </span><span class="cpp1-string">&quot;clicked&quot;</span><span class="cpp1-symbol">, G_CALLBACK(nouvellePartie), NULL);
+    g_signal_connect(G_OBJECT(bouttonCharger), </span><span class="cpp1-string">&quot;clicked&quot;</span><span class="cpp1-symbol">, G_CALLBACK(charger),NULL);
+    g_signal_connect(G_OBJECT(bouttonEditeur), </span><span class="cpp1-string">&quot;clicked&quot;</span><span class="cpp1-symbol">, G_CALLBACK(editeurNiv), NULL);
+    g_signal_connect(G_OBJECT(bouttonOptions), </span><span class="cpp1-string">&quot;clicked&quot;</span><span class="cpp1-symbol">, G_CALLBACK(options), NULL);
+    g_signal_connect(G_OBJECT(bouttonCredit), </span><span class="cpp1-string">&quot;clicked&quot;</span><span class="cpp1-symbol">, G_CALLBACK(credits), NULL);
+    g_signal_connect(G_OBJECT(bouttonQuitter), </span><span class="cpp1-string">&quot;clicked&quot;</span><span class="cpp1-symbol">, G_CALLBACK(Quitter_Principal),(gpointer*)bouttonQuitter);
+ 
+    gtk_widget_show_all(fenetre);
+    gtk_main();
+   
+    </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> EXIT_SUCCESS;
+}
+</span></span>
+</code></pre>
+</body>
+</html>
